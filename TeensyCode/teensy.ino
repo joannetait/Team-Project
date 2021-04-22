@@ -18,6 +18,7 @@
 #define CHIP_SELECT_A 28 // Or any pin you'd like to use
 #define CHIP_SELECT_B 29
 
+// DAC init: DAC_A holds DAC1 and 2, DAC_B holds DAC3 and 4 and so on
 MCP492X myDacA(CHIP_SELECT_A);
 MCP492X myDacB(CHIP_SELECT_B);
 MCP492X myDacC(CHIP_SELECT_C);
@@ -33,10 +34,8 @@ MCP492X myDacH(CHIP_SELECT_H);
 // NOTE: all ID_xxxx variables below are CONTROL numbers for interfacing with Arduino Due
 //       for instance: if Arduino sends over 255 - 210 - 0 - 100 that will mean that the attack of the ADSR is going to be set to 100µs
 //       (Because of this definition -> #define ID_ADSR_ATTACK 210)
-//NOTE2: you can change these definitions as you like, but dont forget to change the according numbers in Max for Live as well.
+//NOTE2: you can change these definitions as you like, but dont forget to change the according numbers in the DUE code as well.
 
-// probably delete that stuff
-#define ID_SONG_MEASURE 251   // defines the start of a measure
 #define ID_SONG_BPM 250       // defines the BPM
 
 // for ADSR1
@@ -76,6 +75,10 @@ MCP492X myDacH(CHIP_SELECT_H);
 #define ID_DAC1_ADSR2_ENABLE 117
 #define ID_DAC1_LFO1_ENABLE 107
 #define ID_DAC1_LFO2_ENABLE 107
+#define ID_DAC1_LFO1_AMOUNT
+#define ID_DAC1_LFO2_AMOUNT
+#define ID_DAC1_ADSR1_AMOUNT
+#define ID_DAC1_ADSR2_AMOUNT
 
 #define ID_DAC2_ADSR1_ENABLE 117
 #define ID_DAC2_ADSR2_ENABLE 117
@@ -159,11 +162,6 @@ bool            dac0_adsr_enable = 0;
 int             dac1_ampl = 4095;
 bool            dac1_adsr_enable = 0;
 
-// variables for the sync port
-float           sync_mode0_freq = 10;                 // Hz
-int             sync_mode1_rate = 15;
-int             sync_mode = 0;                        // 0: Manual sync, 1: Ableton synced
-float           sync_phase = 0;
 
 // internal variables
 int rx_state = 0;
@@ -198,8 +196,8 @@ void setup() {
   connected_t0 = t;
 
   pinMode(LED_BUILTIN, OUTPUT);
-
   digitalWrite(LED_BUILTIN, false);
+  
   myDacA.begin();
   myDacB.begin();
   myDacC.begin();
@@ -231,7 +229,7 @@ void loop() {
   
   
   //-------------------------------write to DAC1---------------------------------//
-  if(dac1_adsr_enable == false) {
+  if(dac1_adsr_enable == false) { // and 
     dac1_lfo.setAmpl(dac1_ampl);
     myDacA.analogWrite(1, dac1_lfo.getWave(t));
   }
@@ -244,20 +242,7 @@ void loop() {
       myDacA.analogWrite(1, dac1_lfo.getWave(t));
     }
   }
-  //digitalWrite(LED_DAC1, round(dac1_lfo.getPhase() * 2) % 2);     // phase goes from 0 to 1 -> multiply w 2 and modulus for 0 and 1
-
-  //-----------------------------write to Sync port-----------------------------//
-// double phase = 0;
-//  if (sync_mode == 0) {                    
-//    phase = (double)(t) * sync_mode0_freq / 1000000; 
-//    digitalWrite(SYNC_OUTPUT, round(phase * 2) % 2);   
-//  } // LFO synced
-//  else if(sync_mode == 1) {   
-//    phase = (double)(t - sync_t0) * _freqArray[sync_mode1_rate] * bpm / 60000000 + sync_phase;      // if midiclk is synced     
-//    digitalWrite(SYNC_OUTPUT, round(phase * 2) % 2);
-//  }
-//  digitalWrite(LED_SYNC, round(phase * 2) % 2);
-
+  
   //-------------------------------timeout led---------------------------------//
   if (digitalRead(LED_BUILTIN))
     if((t - connected_t0) > CONNECTED_TIMEOUT)
@@ -277,7 +262,7 @@ void loop() {
           rx_state = 0;
         }
         break;
-      case 2:                     // second is the control byte
+      case 2:                     // second is the control byte / ID byte
         cc_control = Serial.read();
         break;        
       case 3:                     // third is the most significant byte of the value
