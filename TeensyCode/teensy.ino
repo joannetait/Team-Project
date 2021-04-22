@@ -53,31 +53,104 @@ MCP492X myDacH(CHIP_SELECT_H);
 #define ID_ADSR2_RELEASE 023
 #define ID_ADSR2_TRIGGER 024      // 0 trigger off, 1 trigger on
 
-// for DACs
-#define ID_DAC0_MODE 100
-#define ID_DAC0_MODE0_FREQ 101
-#define ID_DAC0_MODE1_RATE 102
-#define ID_DAC0_WAVEFORM 103
-#define ID_DAC0_AMPL 104
-#define ID_DAC0_AMPL_OFFSET 105
-#define ID_DAC0_PHASE 106
-#define ID_DAC0_ADSR_ENABLE 107
+// for LFO1
+#define ID_LFO1_MODE 100
+#define ID_LFO1_MODE0_FREQ 101
+#define ID_LFO1_MODE1_RATE 102
+#define ID_LFO1_WAVEFORM 103
+#define ID_LFO1_AMPL 104
+#define ID_LFO1_AMPL_OFFSET 105
+#define ID_LFO1_PHASE 106
 
-#define ID_DAC1_MODE 110
-#define ID_DAC1_MODE0_FREQ 111
-#define ID_DAC1_MODE1_RATE 112
-#define ID_DAC1_WAVEFORM 113
-#define ID_DAC1_AMPL 114
-#define ID_DAC1_AMPL_OFFSET 115
-#define ID_DAC1_PHASE 116
-#define ID_DAC1_ADSR_ENABLE 117
+// for LFO2
+#define ID_LFO2_MODE 110
+#define ID_LFO2_MODE0_FREQ 111
+#define ID_LFO2_MODE1_RATE 112
+#define ID_LFO2_WAVEFORM 113
+#define ID_LFO2_AMPL 114
+#define ID_LFO2_AMPL_OFFSET 115
+#define ID_LFO2_PHASE 116
 
-// pin assignments (probably delete that stuff
-#define SYNC_OUTPUT 43      // output port for sync signal (used in the LFO+ADSR Youtube demo to sync the Schippmann filter
-#define LED_DAC0 28         // LED that blinks in the rate of the DAC0 speed
-#define LED_DAC1 32         // LED that blinks in the rate of the DAC1 speed
-#define LED_SYNC 36         // LED that blinks in the rate of the SYNC speed
-#define LED_MEASURE 40      // LED that with every measure changes state (when Ableton is playing a track)
+//For modulation amount to DACs
+#define ID_DAC1_ADSR1_ENABLE 117
+#define ID_DAC1_ADSR2_ENABLE 117
+#define ID_DAC1_LFO1_ENABLE 107
+#define ID_DAC1_LFO2_ENABLE 107
+
+#define ID_DAC2_ADSR1_ENABLE 117
+#define ID_DAC2_ADSR2_ENABLE 117
+#define ID_DAC2_LFO1_ENABLE 107
+#define ID_DAC2_LFO2_ENABLE 107
+
+#define ID_DAC3_ADSR1_ENABLE 117
+#define ID_DAC3_ADSR2_ENABLE 117
+#define ID_DAC3_LFO1_ENABLE 107
+#define ID_DAC3_LFO2_ENABLE 107
+
+#define ID_DAC4_ADSR1_ENABLE 117
+#define ID_DAC4_ADSR2_ENABLE 117
+#define ID_DAC4_LFO1_ENABLE 107
+#define ID_DAC4_LFO2_ENABLE 107
+
+#define ID_DAC5_ADSR1_ENABLE 117
+#define ID_DAC5_ADSR2_ENABLE 117
+#define ID_DAC5_LFO1_ENABLE 107
+#define ID_DAC5_LFO2_ENABLE 107
+
+#define ID_DAC6_ADSR1_ENABLE 117
+#define ID_DAC6_ADSR2_ENABLE 117
+#define ID_DAC6_LFO1_ENABLE 107
+#define ID_DAC6_LFO2_ENABLE 107
+
+#define ID_DAC7_ADSR1_ENABLE 117
+#define ID_DAC7_ADSR2_ENABLE 117
+#define ID_DAC7_LFO1_ENABLE 107
+#define ID_DAC7_LFO2_ENABLE 107
+
+#define ID_DAC8_ADSR1_ENABLE 117
+#define ID_DAC8_ADSR2_ENABLE 117
+#define ID_DAC8_LFO1_ENABLE 107
+#define ID_DAC8_LFO2_ENABLE 107
+
+#define ID_DAC9_ADSR1_ENABLE 117
+#define ID_DAC9_ADSR2_ENABLE 117
+#define ID_DAC9_LFO1_ENABLE 107
+#define ID_DAC9_LFO2_ENABLE 107
+
+#define ID_DAC10_ADSR1_ENABLE 117
+#define ID_DAC10_ADSR2_ENABLE 117
+#define ID_DAC10_LFO1_ENABLE 107
+#define ID_DAC10_LFO2_ENABLE 107
+
+#define ID_DAC11_ADSR1_ENABLE 117
+#define ID_DAC11_ADSR2_ENABLE 117
+#define ID_DAC11_LFO1_ENABLE 107
+#define ID_DAC11_LFO2_ENABLE 107
+
+#define ID_DAC12_ADSR1_ENABLE 117
+#define ID_DAC12_ADSR2_ENABLE 117
+#define ID_DAC12_LFO1_ENABLE 107
+#define ID_DAC12_LFO2_ENABLE 107
+
+#define ID_DAC13_ADSR1_ENABLE 117
+#define ID_DAC13_ADSR2_ENABLE 117
+#define ID_DAC13_LFO1_ENABLE 107
+#define ID_DAC13_LFO2_ENABLE 107
+
+#define ID_DAC14_ADSR1_ENABLE 117
+#define ID_DAC14_ADSR2_ENABLE 117
+#define ID_DAC14_LFO1_ENABLE 107
+#define ID_DAC14_LFO2_ENABLE 107
+
+#define ID_DAC15_ADSR1_ENABLE 117
+#define ID_DAC15_ADSR2_ENABLE 117
+#define ID_DAC15_LFO1_ENABLE 107
+#define ID_DAC15_LFO2_ENABLE 107
+
+#define ID_DAC16_ADSR1_ENABLE 117
+#define ID_DAC16_ADSR2_ENABLE 117
+#define ID_DAC16_LFO1_ENABLE 107
+#define ID_DAC16_LFO2_ENABLE 107
 
 // variables 
 float           bpm = 120;
@@ -105,72 +178,42 @@ unsigned long   connected_t0 = 0;
 float _freqArray[24] = {64, 48, 32, 24, 16, 12, 8, 6, 5.3333, 4, 3.2, 3, 2.667, 2, 1.333, 1, 0.667, 0.5, 0.333, 0.25, 0.167, 0.125, 0.0625, 0.03125};
 
 // internal classes
-lfo         dac0_lfo(DACSIZE);
-lfo         dac1_lfo(DACSIZE);
-adsr        adsr(DACSIZE);
+lfo         lfo1(DACSIZE);
+lfo         lfo2(DACSIZE);
+adsr        adsr1(DACSIZE);
+adsr        adsr2(DACSIZE);
 
 int getInt(int l_highByte, int l_lowByte) {
   return ((unsigned int)l_highByte << 8) + l_lowByte;
 }
 
-// GUItool: begin automatically generated code
-AudioInputI2S            i2s1;           //xy=68.19999694824219,129.1999969482422
-AudioOutputUSB           usb1;           //xy=413.20001220703125,125.19999694824219
-AudioInputUSB            usb2;           //xy=534.2000122070312,123.19999694824219
-AudioOutputI2S           i2s2;           //xy=855.2000122070312,135.1999969482422
-AudioConnection          patchCord1(i2s1, 0, usb1, 0);
-AudioConnection          patchCord2(i2s1, 1, usb1, 1);
-AudioConnection          patchCord3(usb2, 0, i2s2, 0);
-AudioConnection          patchCord4(usb2, 1, i2s2, 1);
-AudioControlSGTL5000     sgtl5000_1;     //xy=472.1999969482422,351.1999969482422
-// GUItool: end automatically generated code
-
-
 
 void setup() {
   delay(100);
-  AudioMemory(12);
-  dac0_lfo.setAmpl(dac0_ampl); // init amplitude
-  dac1_lfo.setAmpl(dac1_ampl); // init amplitude
+
+  lfo1.setAmpl(DACSIZE); // init amplitude
+  lfo2.setAmpl(DACSIZE); // init amplitude
 
   sync_t0 = t;
   connected_t0 = t;
-//
-//  pinMode(SYNC_OUTPUT, OUTPUT);
-//  pinMode(LED_DAC0, OUTPUT);
-//  pinMode(LED_DAC1, OUTPUT);
-//  pinMode(LED_SYNC, OUTPUT);
+
   pinMode(LED_BUILTIN, OUTPUT);
-//
-//  digitalWrite(SYNC_OUTPUT, false);
-//  digitalWrite(LED_DAC0, false);
-//  digitalWrite(LED_DAC1, false);
-//  digitalWrite(LED_SYNC, false);
+
   digitalWrite(LED_BUILTIN, false);
   myDacA.begin();
   myDacB.begin();
+  myDacC.begin();
+  myDacD.begin();
+  myDacE.begin();
+  myDacF.begin();
+  myDacG.begin();
+  myDacH.begin();
+  
   Serial.begin(115200);
-  sgtl5000_1.enable();
-  sgtl5000_1.volume(0.6);
-  sgtl5000_1.lineOutLevel(13);
 }
 
 void loop() {
-    // read the PC's volume setting
-  float vol = usb2.volume();
-  // scale to a nice range (not too loud)
-  // and adjust the audio shield output volume
-  if (vol > 0) {
-    // scale 0 = 1.0 range to:
-    //  0.3 = almost silent
-    //  0.8 = really loud
-    vol = 0.3 + vol * 0.5;
-  }
-  // use the scaled volume setting.  Delete this for fixed volume.
-  sgtl5000_1.volume(vol);
-  
   t = micros();           // take timestamp
-
   //-------------------------------write to DAC0---------------------------------//
   if(dac0_adsr_enable == false) {
     dac0_lfo.setAmpl(dac0_ampl);
@@ -185,8 +228,8 @@ void loop() {
       myDacA.analogWrite(0, dac0_lfo.getWave(t));
     }
   }
-  //digitalWrite(LED_DAC0, round(dac0_lfo.getPhase() * 2) % 2);     // phase goes from 0 to 1 -> multiply w 2 and modulus for 0 and 1
-
+  
+  
   //-------------------------------write to DAC1---------------------------------//
   if(dac1_adsr_enable == false) {
     dac1_lfo.setAmpl(dac1_ampl);
