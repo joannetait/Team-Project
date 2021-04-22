@@ -1,4 +1,4 @@
-Four bytes interface is used between Arduino Due and Teensy on COM serial port:
+// Four bytes interface is used between Arduino Due and Teensy on COM serial port:
 // Byte 1: 255 (sync byte)
 // Byte 2: <control> - [0:255]
 // Byte 3: <value MSB> - [0:255]
