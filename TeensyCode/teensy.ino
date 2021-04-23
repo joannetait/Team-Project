@@ -15,8 +15,14 @@
 #include <adsr.h>         // required for function generation
 
 
-#define CHIP_SELECT_A 28 // Or any pin you'd like to use
-#define CHIP_SELECT_B 29
+#define CHIP_SELECT_A 14 // =SC1 on schematic 
+#define CHIP_SELECT_B 13 // =SC2 on schematic etc
+#define CHIP_SELECT_C 12
+#define CHIP_SELECT_D 11
+#define CHIP_SELECT_E 10
+#define CHIP_SELECT_F 9 
+#define CHIP_SELECT_G 8
+#define CHIP_SELECT_H 7
 
 // DAC init: DAC_A holds DAC1 and 2, DAC_B holds DAC3 and 4 and so on
 MCP492X myDacA(CHIP_SELECT_A);
@@ -239,7 +245,7 @@ float _freqArray[24] = {64, 48, 32, 24, 16, 12, 8, 6, 5.3333, 4, 3.2, 3, 2.667, 
 lfo         lfo1(DACSIZE);
 lfo         lfo2(DACSIZE);
 adsr        adsr1(DACSIZE);
-adsr        adsr2(DACSIZE);
+adsr        adsr2(DACSIZE); 
 
 int getInt(int l_highByte, int l_lowByte) {
   return ((unsigned int)l_highByte << 8) + l_lowByte;
