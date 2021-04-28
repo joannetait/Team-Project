@@ -359,7 +359,7 @@ void loop() {
             }
         }
               
-        // LFO - DAC0
+         // LFO - DAC0
         else if (cc_control == ID_DAC0_MODE)
           dac0_lfo.setMode(value);
         else if (cc_control == ID_DAC0_MODE0_FREQ)
@@ -414,7 +414,7 @@ void loop() {
           else if (value == 0)
             adsr.noteOff(t);
         }
-
+     
         // Sync prob delete that stuff
         else if (cc_control == ID_SYNC_MODE)
           sync_mode = value;
