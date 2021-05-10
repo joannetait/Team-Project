@@ -13,7 +13,7 @@
 #include <SerialFlash.h>
 #include <lfo.h>          // required for function generation
 #include <adsr.h>         // required for function generation
-
+#include <MIDIUSB.h> //might be wrong double check plz
 
 #define CHIP_SELECT_A 14 // =SC1 on schematic 
 #define CHIP_SELECT_B 13 // =SC2 on schematic etc
@@ -227,6 +227,7 @@ int             dac0_ampl = 4095;
 bool            dac0_adsr_enable = 0;
 int             dac1_ampl = 4095;
 bool            dac1_adsr_enable = 0;
+//ADD MORE OF THESE
 
 
 // internal variables
@@ -247,9 +248,6 @@ lfo         lfo2(DACSIZE);
 adsr        adsr1(DACSIZE);
 adsr        adsr2(DACSIZE); 
 
-int getInt(int l_highByte, int l_lowByte) {
-  return ((unsigned int)l_highByte << 8) + l_lowByte;
-}
 
 
 void setup() {
@@ -278,6 +276,63 @@ void setup() {
 
 void loop() {
   t = micros();           // take timestamp
+
+//from https://github.com/elkayem/usbMIDI2CV_MC/blob/master/usbMIDI2CV_MC.ino#L195
+if (usbMIDI.read()) {                    
+    byte type = usbMIDI.getType();
+    switch (type) {
+        
+      case usbMIDI.NoteOff:
+      case usbMIDI.NoteOn:
+        noteMsg = usbMIDI.getData1() - 21; // A0 = 21, Top Note = 108
+        channel = usbMIDI.getChannel()-1;
+
+        if (channel > 2) return;  // Only channel 0,1,2 supported
+        if ((noteMsg < 0) || (noteMsg > 87)) break;  // Only 88 notes of keyboard are supported
+
+        if (type == usbMIDI.NoteOn) velocity = usbMIDI.getData2();
+        else velocity  = 0;  
+
+        if (velocity == 0)  {
+          notes[channel][noteMsg] = false;
+          adsr1.noteOff(t);
+          adsr2.noteOff(t);
+        }
+        else {
+          notes[channel][noteMsg] = true;
+          adsr1.noteOn(t);
+          adsr2.noteOn(t);
+        }
+
+        if (notePriority[channel] == 'T') // Top note priority
+          commandTopNote(channel);
+        else if (notePriority[channel] == 'B') // Bottom note priority
+          commandBottomNote(channel);
+        else { // Last note priority  
+          if (notes[channel][noteMsg]) {  // If note is on and using last note priority, add to ordered list
+            orderIndx[channel] = (orderIndx[channel]+1) % 10;
+            noteOrder[channel][orderIndx[channel]] = noteMsg;                 
+          }
+          commandLastNote(channel);
+        }
+            
+        break;
+
+        case usbMIDI.PitchBend:
+        if (usbMIDI.getChannel() == pitchBendChan) {
+          // Pitch bend output from 0 to 1023 mV.  Left shift d2 by 4 to scale from 0 to 2047.
+          // With DAC gain = 1X, this will yield a range from 0 to 1023 mV.  Additional amplification
+          // after DAC will rescale to -1 to +1V.
+          d2 = usbMIDI.getData2(); // d2 from 0 to 127, mid point = 64
+          mydacA.analogWrite(1, d2<<4);  
+          mydacC.analogWrite(1, d2<<4);
+        }
+        break;
+    }
+
+
+
+
   //-------------------------------write to DAC0---------------------------------//
   if(dac0_adsr_enable == false) {
     dac0_lfo.setAmpl(dac0_ampl);
@@ -427,3 +482,75 @@ void loop() {
         break;
     }
   }
+
+int getInt(int l_highByte, int l_lowByte) {
+  return ((unsigned int)l_highByte << 8) + l_lowByte;
+}
+
+void commandTopNote(int channel)
+{
+  int topNote = 0;
+  bool noteActive = false;
+ 
+  for (int i=0; i<88; i++)
+  {
+    if (notes[channel][i]) {
+      topNote = i;
+      noteActive = true;
+    }
+  }
+
+  if (noteActive) 
+    commandNote(topNote, channel);
+  //else // All notes are off, turn off gate
+    //digitalWrite(GATE(channel),LOW);
+}
+
+void commandBottomNote(int channel)
+{
+  int bottomNote = 0;
+  bool noteActive = false;
+ 
+  for (int i=87; i>=0; i--)
+  {
+    if (notes[channel][i]) {
+      bottomNote = i;
+      noteActive = true;
+    }
+  }
+
+  if (noteActive) 
+    commandNote(bottomNote, channel);
+  //else // All notes are off, turn off gate
+   // digitalWrite(GATE(channel),LOW);
+}
+
+void commandLastNote(int channel)
+{
+  int8_t noteIndx;
+  
+  for (int i=0; i<10; i++) {
+    noteIndx = noteOrder[channel][ mod(orderIndx[channel]-i, 10) ];
+    if (notes[channel][noteIndx]) {
+      commandNote(noteIndx,channel);
+      return;
+    }
+  }
+ // digitalWrite(GATE(channel),LOW);  // All notes are off
+}
+
+// Rescale 88 notes to 4096 mV:
+//    noteMsg = 0 -> 0 mV 
+//    noteMsg = 87 -> 4096 mV
+// DAC output will be (4095/87) = 47.069 mV per note, and 564.9655 mV per octave
+// Note that DAC output will need to be amplified by 1.77X for the standard 1V/octave 
+#define NOTE_SF 47.069f 
+
+void commandNote(int noteMsg, int channel) {
+  //digitalWrite(GATE(channel),HIGH);
+  trigTimer[channel] = millis();
+  
+  unsigned int mV = (unsigned int) ((float) noteMsg * NOTE_SF * sfAdj[channel] + 0.5);   
+  myDacA.analogWrite(0, mV); 
+  myDacC.analogWrite(0, mV); 
+}
