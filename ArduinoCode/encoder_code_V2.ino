@@ -1,26 +1,26 @@
 #include <Bounce2.h>
 
 // mux adress pins
-#define S0 31;
-#define S1 29;
-#define S2 27;
-#define S3 25;
+#define S0 31
+#define S1 29
+#define S2 27
+#define S3 25
 
 // the input pins (mux's outputs):
-#define mux1A 65;
-#define mux1B 64;
-#define mux2A 63;
-#define mux2B 62;
-#define mux_enable 23;
+#define mux1A 65
+#define mux1B 64
+#define mux2A 63
+#define mux2B 62
+#define mux_enable 23
 
-// define encoder button pins (get pin numbers from arduino due schematic and encoders pcb file)
+// define encoder button pins (get pin numbers from arduino due schematic and encoders pcb file). undefined buttons for the screen are on pin 37/35/53
 
-#define VCO_BUTTON_PIN 1
-#define FM_BUTTON_PIN 2
-#define OCT_LVL_BUTTON_PIN 3
-#define LFO_BUTTON_PIN 4
-#define LFO_MODE_BUTTON_PIN 5
-#define ADSR_BUTTON_PIN 6
+#define VCO_BUTTON_PIN 43
+#define FM_BUTTON_PIN 39
+#define OCT_LVL_BUTTON_PIN 41
+#define LFO_BUTTON_PIN 47
+#define LFO_MODE_BUTTON_PIN 49
+#define ADSR_BUTTON_PIN 51
 
 // instantiate bounce objects
 Bounce2::Button VCOButton = Bounce2::Button();
@@ -55,6 +55,22 @@ bool enc_VCO_PWM_B;
 bool enc_VCO_SHAPE_A;
 bool enc_VCO_SHAPE_B;
 
+bool enc_OCTLVL_A_prev;
+bool enc_OCTLVL_B_prev;
+bool enc_FM_DETUNE_A_prev;
+bool enc_FM_DETUNE_B_prev;
+bool enc_VCO_PWM_A_prev;
+bool enc_VCO_PWM_B_prev;
+bool enc_VCO_SHAPE_A_prev;
+bool enc_VCO_SHAPE_B_prev;
+
+bool enc_CUTOFF_A_prev;
+bool enc_CUTOFF_B_prev;
+bool enc_RES_A_prev;
+bool enc_RES_B_prev;
+bool enc_DRIVE_A_prev;
+bool enc_DRIVE_B_prev;
+
 bool enc_CUTOFF_A;
 bool enc_CUTOFF_B;
 bool enc_RES_A;
@@ -73,6 +89,17 @@ bool enc_LFO_AMPLITUDE_B;
 bool enc_LFO_OFFSET_A;
 bool enc_LFO_OFFSET_B;
 
+bool enc_LFO_FREQ_A_prev;
+bool enc_LFO_FREQ_B_prev;
+bool enc_lFO_SHAPE_A_prev;
+bool enc_LFO_SHAPE_B_prev;
+bool enc_LFO_PWM_A_prev;
+bool enc_LFO_PWM_B_prev;
+bool enc_LFO_AMPLITUDE_A_prev;
+bool enc_LFO_AMPLITUDE_B_prev;
+bool enc_LFO_OFFSET_A_prev;
+bool enc_LFO_OFFSET_B_prev;
+
 bool enc_ADSR_ATTACK_A;
 bool enc_ADSR_ATTACK_B;
 bool enc_ADSR_DECAY_A;
@@ -82,7 +109,92 @@ bool enc_ADSR_SUSTAIN_B;
 bool enc_ADSR_RELEASE_A;
 bool enc_ADSR_RELEASE_B;
 
+bool enc_ADSR_ATTACK_A_prev;
+bool enc_ADSR_ATTACK_B_prev;
+bool enc_ADSR_DECAY_A_prev;
+bool enc_ADSR_DECAY_B_prev;
+bool enc_ADSR_SUSTAIN_A_prev;
+bool enc_ADSR_SUSTAIN_B_prev;
+bool enc_ADSR_RELEASE_A_prev;
+bool enc_ADSR_RELEASE_B_prev;
 
+//initialise parameter positions and previous positions
+    
+int VCO1_OCT_position  = 0;
+int VCO1_LVL_position  = 0;
+int VCO1_FM_AMOUNT_position  = 0;
+int VCO1_SHAPE_position  = 0;
+int VCO1_PWM_position  = 0;
+    
+int VCO1_OCT_position_prev  = 0;
+int VCO1_LVL_position_prev  = 0;
+int VCO1_FM_AMOUNT_position_prev  = 0;
+int VCO1_SHAPE_position_prev  = 0;
+int VCO1_PWM_position_prev  = 0;
+
+int VCO2_OCT_position  = 0;
+int VCO2_LVL_position  = 0;
+int VCO2_DETUNE_position  = 0;
+int VCO2_SHAPE_position  = 0;
+int VCO2_PWM_position  = 0;
+
+int VCO2_OCT_position_prev = 0;
+int VCO2_LVL_position_prev  = 0;
+int VCO2_DETUNE_position_prev  = 0;
+int VCO2_SHAPE_position_prev  = 0;
+int VCO2_PWM_position_prev  = 0;
+
+int VCF_CUTOFF_position  = 0;
+int VCF_Q_position  = 0;
+int VCF_DRIVE_position  = 0;
+
+int VCF_CUTOFF_position_prev  = 0;
+int VCF_Q_position_prev  = 0;
+int VCF_DRIVE_position_prev  = 0;   
+
+int LFO1_FREQ_position  = 0;
+int LFO1_SHAPE_position  = 0;
+int LFO1_PWM_position  = 0;
+int LFO1_AMPLITUDE_position  = 0;
+int LFO1_OFFSET_position  = 0;
+
+int LFO1_FREQ_position_prev  = 0;
+int LFO1_SHAPE_position_prev  = 0;
+int LFO1_PWM_position_prev  = 0;
+int LFO1_AMPLITUDE_position_prev  = 0;
+int LFO1_OFFSET_position_prev  = 0;
+
+int LFO2_FREQ_position  = 0;
+int LFO2_SHAPE_position  = 0;
+int LFO2_PWM_position  = 0;
+int LFO2_AMPLITUDE_position  = 0;
+int LFO2_OFFSET_position  = 0;
+
+int LFO2_FREQ_position_prev  = 0;
+int LFO2_SHAPE_position_prev  = 0;
+int LFO2_PWM_position_prev  = 0;
+int LFO2_AMPLITUDE_position_prev  = 0;
+int LFO2_OFFSET_position_prev  = 0;
+
+int ADSR1_ATTACK_position  = 0;
+int ADSR1_DECAY_position  = 0;
+int ADSR1_SUSTAIN_position  = 0;
+int ADSR1_RELEASE_position  = 0;
+
+int ADSR1_ATTACK_position_prev  = 0;
+int ADSR1_DECAY_position_prev  = 0;
+int ADSR1_SUSTAIN_position_prev = 0;
+int ADSR1_RELEASE_position_prev  = 0;
+
+int ADSR2_ATTACK_position  = 0;
+int ADSR2_DECAY_position  = 0;
+int ADSR2_SUSTAIN_position  = 0;
+int ADSR2_RELEASE_position  = 0;
+
+int ADSR2_ATTACK_position_prev  = 0;
+int ADSR2_DECAY_position_prev  = 0;
+int ADSR2_SUSTAIN_position_prev  = 0;
+int ADSR2_RELEASE_position_prev  = 0;
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void setup() {
@@ -137,85 +249,7 @@ void setup() {
     Serial.println("Multiplexed Encoder Test:");
     
 
-    //initialise parameter positions and previous positions
-    
-    int VCO1_OCT_position  = 0;
-    int VCO1_LVL_position  = 0;
-    int VCO1_FM_AMOUNT_position  = 0;
-    int VCO1_SHAPE_position  = 0;
-    int VCO1_PWM_position  = 0;
-    
-    int VCO1_OCT_position_prev  = 0;
-    int VCO1_LVL_position_prev  = 0;
-    int VCO1_FM_AMOUNT_position_prev  = 0;
-    int VCO1_SHAPE_position_prev  = 0;
-    int VCO1_PWM_position_prev  = 0;
 
-    int VCO2_OCT_position  = 0;
-    int VCO2_LVL_position  = 0;
-    int VCO2_DETUNE_position  = 0;
-    int VCO2_SHAPE_position  = 0;
-    int VCO2_PWM_position  = 0;
-    
-    int VCO2_OCT_position_prev = 0;
-    int VCO2_LVL_position_prev  = 0;
-    int VCO2_DETUNE_position_prev  = 0;
-    int VCO2_SHAPE_position_prev  = 0;
-    int VCO2_PWM_position_prev  = 0;
-
-    int VCF_CUTOFF_position  = 0;
-    int VCF_Q_position  = 0;
-    int VCF_DRIVE_position  = 0;
-    
-    int VCF_CUTOFF_position_prev  = 0;
-    int VCF_Q_position_prev  = 0;
-    int VCF_DRIVE_position_prev  = 0;   
-
-    int LFO1_FREQ_position  = 0;
-    int LFO1_SHAPE_position  = 0;
-    int LFO1_PWM_position  = 0;
-    int LFO1_AMPLITUDE_position  = 0;
-    int LFO1_OFFSET_position  = 0;
-
-    int LFO1_FREQ_position_prev  = 0;
-    int LFO1_SHAPE_position_prev  = 0;
-    int LFO1_PWM_position_prev  = 0;
-    int LFO1_AMPLITUDE_position_prev  = 0;
-    int LFO1_OFFSET_position_prev  = 0;
-    
-    int LFO2_FREQ_position  = 0;
-    int LFO2_SHAPE_position  = 0;
-    int LFO2_PWM_position  = 0;
-    int LFO2_AMPLITUDE_position  = 0;
-    int LFO2_OFFSET_position  = 0;
-
-    int LFO2_FREQ_position_prev  = 0;
-    int LFO2_SHAPE_position_prev  = 0;
-    int LFO2_PWM_position_prev  = 0;
-    int LFO2_AMPLITUDE_position_prev  = 0;
-    int LFO2_OFFSET_position_prev  = 0;
-    
-    int ADSR1_ATTACK_position  = 0;
-    int ADSR1_DECAY_position  = 0;
-    int ADSR1_SUSTAIN_position  = 0;
-    int ADSR1_RELEASE_position  = 0;
-
-    int ADSR1_ATTACK_position_prev  = 0;
-    int ADSR1_DECAY_position_prev  = 0;
-    int ADSR1_SUSTAIN_position_prev = 0;
-    int ADSR1_RELEASE_position_prev  = 0;
-
-    int ADSR2_ATTACK_position  = 0;
-    int ADSR2_DECAY_position  = 0;
-    int ADSR2_SUSTAIN_position  = 0;
-    int ADSR2_RELEASE_position  = 0;
-
-    int ADSR2_ATTACK_position_prev  = 0;
-    int ADSR2_DECAY_position_prev  = 0;
-    int ADSR2_SUSTAIN_position_prev  = 0;
-    int ADSR2_RELEASE_position_prev  = 0;
-    
-  }
 }
 
 void loop() {
@@ -235,8 +269,8 @@ void loop() {
     if (VCO_select = HIGH) { // button controls wether we sync VCO2 to 1
       SYNC_select = !SYNC_select;
       //send change to teensy to switch CD4066 SYNC ON or OFF 
-
-      
+      }
+  }
   VCO_OCT_LEVEL_Button.update(); 
   if ( VCO_OCT_LEVEL_Button.pressed()) {
     VCO1_OCT_LVL_select = !VCO1_OCT_LVL_select;
@@ -293,11 +327,12 @@ void updateEncoders() { //runs through all the encoders
       if (VCO1_OCT_position != VCO1_OCT_position_prev){
         //send change to teensy
       }
+    }
 
     if (VCO1_OCT_LVL_select == HIGH) { //encoder controls VCO1 volume
-      VCO1_LVL_prev = VCO1_LVL_position;
+      VCO1_LVL_position_prev = VCO1_LVL_position;
       
-      getPosition(enc_OCTLVL_A, enc_OCTLVL_B, enc_OCTLVL_A_prev, enc_OCTLVL_B_prev, VCO1__LVL_position, mux1A, mux1B); //get new position
+      getPosition(enc_OCTLVL_A, enc_OCTLVL_B, enc_OCTLVL_A_prev, enc_OCTLVL_B_prev,VCO1_LVL_position, mux1A, mux1B); //get new position
       
       if ( VCO1_LVL_position > 127 ) { //boundary check
         VCO1_LVL_position = 127;
@@ -309,7 +344,8 @@ void updateEncoders() { //runs through all the encoders
       if (VCO1_LVL_position != VCO1_LVL_position_prev){
         //send change to teensy
       }
-
+    }
+  }
   if (VCO_select == HIGH) { //encoders control VCO2
     if (VCO2_OCT_LVL_select == LOW) { //encoder controls octave number
       VCO2_OCT_position_prev = VCO2_OCT_position;
@@ -326,11 +362,12 @@ void updateEncoders() { //runs through all the encoders
       if (VCO2_OCT_position != VCO2_OCT_position_prev){
         //send change to teensy
       }
+    }
 
     if (VCO2_OCT_LVL_select == HIGH) { //encoder controls VCO1 volume
-      VCO2_LVL_prev = VCO2_LVL_position;
+      VCO2_LVL_position_prev = VCO2_LVL_position;
       
-      getPosition(enc_OCTLVL_A, enc_OCTLVL_B, enc_OCTLVL_A_prev, enc_OCTLVL_B_prev, VCO2__LVL_position, mux1A, mux1B); //get new position
+      getPosition(enc_OCTLVL_A, enc_OCTLVL_B, enc_OCTLVL_A_prev, enc_OCTLVL_B_prev, VCO2_LVL_position, mux1A, mux1B); //get new position
       
       if ( VCO2_LVL_position > 127 ) { //boundary check
         VCO2_LVL_position = 127;
@@ -342,6 +379,8 @@ void updateEncoders() { //runs through all the encoders
       if (VCO2_LVL_position != VCO2_LVL_position_prev){
         //send change to teensy
       }
+    }   
+ }
 
 
 /////////////////////////////////////////////////////////////    
@@ -434,10 +473,10 @@ void updateEncoders() { //runs through all the encoders
   digitalWrite(S1, HIGH);
   digitalWrite(S2, HIGH);
   digitalWrite(S3, HIGH);
-   }
+   
 }
 
-void getPosition(&encA,&encB,&encA_prev,&encB_prev,&param_position,&muxA,&muxB) {  //send the parameter virtual pin names, their previous position, the parameter current value and
+void getPosition(bool encA,bool encB,bool encA_prev,bool encB_prev, int param_position,int muxA,int muxB) {  //send the parameter virtual pin names, their previous position, the parameter current value and
                                                                                    //the multiplexer pins on which the physical encoder is, "returns" the new parameter position.
                                                                                     
       encA = digitalRead(muxA); //reads encoder physical position, make sure the multiplexer is set accordingly before calling function.
