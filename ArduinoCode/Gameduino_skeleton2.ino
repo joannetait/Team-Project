@@ -1,17 +1,18 @@
 # include <EEPROM.h>
 # include <SPI.h>
 # include <GD2.h>
+
+//********************* setup, display startup screen ********************
+
 void setup()
 {
-
-
-    GD.begin();
+    GD.begin(); //start the display
     Serial.begin (9600);                    
     GD.ClearColorRGB(0x103000);
-    GD.Clear();
-    GD.cmd_text(240, 136, 31, OPT_CENTER, "Team 1");
-    GD.swap();
-    delay(1000);
+    GD.Clear();                         //clear the display
+    GD.cmd_text(240, 136, 31, OPT_CENTER, "Team 1"); 
+    GD.swap();              //update the display
+    delay(1000);            //keep startup screen for 1s
 }
 
 void loop()
@@ -19,22 +20,24 @@ void loop()
     int xtouch;
     int ytouch;
     int brntag;
-    GD.Clear(); 
-    GD.Begin(RECTS); 
-    GD.LineWidth(5 * 5); // corner radius 5.0 pixels 
-    GD.Tag(1);
-    GD.Vertex2ii(30, 115); GD.Vertex2ii(220, 155); 
+    /******************* initial menu ******************/
+    GD.Clear();                 //clear the screen (posibly not vital?)
+    GD.Begin(RECTS);            //start drawing rectangles
+    GD.LineWidth(5 * 5);        // corner radius 5.0 pixels 
+    /* Now create a tagmask including all the rectangles. The whole rectangle carries the mask */
+    GD.Tag(1);                  //create tag for rectangle 1
+    GD.Vertex2ii(30, 115); GD.Vertex2ii(220, 155);      //define rectangle 1, top left + bottom right corners
     GD.Tag(2);
     GD.Vertex2ii(250, 115); GD.Vertex2ii(450, 155);
-    GD.TagMask(0);
+    GD.TagMask(0);              //end tagmask creation
     
     GD.ColorRGB(0x103000);
-    GD.cmd_text(30, 136, 25, OPT_CENTERY, "Settings");
+    GD.cmd_text(30, 136, 25, OPT_CENTERY, "Settings");         
     GD.cmd_text(250, 136, 25, OPT_CENTERY, "Performance");
     
-    GD.swap();
-    int retval;
-    GD.get_inputs();
+    GD.swap();                   //update screen with initial menu
+    int retval;                  //define throwaway int for storing screen press info
+    GD.get_inputs();             //check for screen press
     xtouch = GD.inputs.x;
     ytouch = GD.inputs.y;
     brntag = GD.inputs.tag;
@@ -42,13 +45,13 @@ void loop()
     while(xtouch >= 0)          //debounce menu select from previous
     {
         GD.get_inputs();
-        xtouch = GD.inputs.x;
-        ytouch = GD.inputs.y;
-        brntag = GD.inputs.tag;
+        xtouch = GD.inputs.x;       //x coordinates of screen press
+        ytouch = GD.inputs.y;       //y coordintaes of screen press
+        brntag = GD.inputs.tag;     //which tag has been pressed
     }
-    int buttonpress = 0;
-    //Draws the main menu for dual probe
-    while(buttonpress == 0)
+    int buttonpress = 0;            //assume screen is not pressed initialy
+    
+    while(buttonpress == 0)         //only one button can be pressed at a time
     {
         // Determine if a button has been pressed
         GD.get_inputs();
@@ -56,11 +59,12 @@ void loop()
         ytouch = GD.inputs.y;
         brntag = GD.inputs.tag;
         //Serial.println("x %i y %i Button pressed %i \n \r ",xtouch, ytouch, brntag);
-        if ((xtouch >= 0) && (brntag >0))
+        if ((xtouch >= 0) && (brntag >0))          //has screen been pressed?
         {       //key decode loop
             //Serial.println("x %i y %i Button pressed %i \n \r ",xtouch, ytouch, brntag);
-            buttonpress = 1;
+            buttonpress = 1;           //screen is being pressed now
            
+            /*  the following is an ugly, but functioning method for checking our tagmask */
             if (brntag == 1)
             {
                 retval = 1;
@@ -72,7 +76,7 @@ void loop()
             else retval = 0;
         }
      }
-    while((xtouch >= 0) && (brntag >0))
+    while((xtouch >= 0) && (brntag >0)) //keep checking the screen for press until button is released
     {
         GD.get_inputs();
         xtouch = GD.inputs.x;
@@ -82,10 +86,14 @@ void loop()
     }
     Serial.println(retval); //print pres value to serial monitor
 
-    if(retval == 1) //"settings"
+
+    //**************** the SETTINGS screen is defined below in a similar fashion *****************//
+    //********************************************************************************************//
+    if(retval == 1) //if the settings button has been pressed
     {
         do
         {
+            //print seetings screen and create appropriate tagmasks
             GD.Clear(); 
             GD.Begin(RECTS); 
             GD.LineWidth(5 * 5); // corner radius 5.0 pixels 
@@ -168,9 +176,12 @@ void loop()
                 brntag = GD.inputs.tag;
                 //wait for button to be released
             }
-            Serial.println(retval); //print pres value to serial monitor
-        } while (retval != 7);
+            Serial.println(retval); //print press value to serial monitor
+        } while (retval != 7);      //stay in loop until the return button is pressed
     }
+
+    //**************** the PERFORMANCE screen is defined below *****************//
+    //**************************************************************************//
     else if(retval == 2) //"performance"
     {
         do
@@ -244,6 +255,9 @@ void loop()
                 //wait for button to be released
             }
             Serial.println(retval); //print pres value to serial monitor
+
+            //**************** the MOD MATRIX screen is defined below *****************//
+            //*************************************************************************//
             if(retval == 8) //"Mod matrix"
             {
                 do
@@ -397,8 +411,8 @@ void loop()
                         //wait for button to be released
                     }
                     Serial.println(retval); //print pres value to serial monitor
-                } while (retval != 25);
+                } while (retval != 25);     //stay in loop until return button is pressed
             }
-        } while (retval != 10);
+        } while (retval != 10);     // stay in loop until return button is pressed
     }
-}
+}       //end of main loop
