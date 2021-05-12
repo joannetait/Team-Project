@@ -43,7 +43,7 @@ MCP492X myDacH(CHIP_SELECT_H);
 //NOTE2: you can change these definitions as you like, but dont forget to change the according numbers in the DUE code as well.
 
 #define ID_SONG_BPM 250       // defines the BPM
-
+#define ID_NOTE_PRIORITY 251
 // for ADSR1
 #define ID_ADSR1_ATTACK 010
 #define ID_ADSR1_DECAY 011
@@ -227,6 +227,7 @@ int             dac0_ampl = 4095;
 bool            dac0_adsr_enable = 0;
 int             dac1_ampl = 4095;
 bool            dac1_adsr_enable = 0;
+int             note_priority = 2; // 0 = bottom note 1=top note 2=last note //receive from teensy in note priority menu default is last note 
 //ADD MORE OF THESE
 
 
@@ -240,7 +241,8 @@ unsigned long   t = 0;
 unsigned long   sync_t0 = 0;
 unsigned long   connected_t0 = 0;
 
-float _freqArray[24] = {64, 48, 32, 24, 16, 12, 8, 6, 5.3333, 4, 3.2, 3, 2.667, 2, 1.333, 1, 0.667, 0.5, 0.333, 0.25, 0.167, 0.125, 0.0625, 0.03125};
+float _freqArray[24] = {64, 48, 32, 24, 16, 12, 8, 6, 5.3333, 4, 3.2, 3, 2.667, 2, 1.333, 1, 0.667, 0.5, 0.333, 0.25, 0.167, 0.125, 0.0625, 0.03125}; //array representing the different
+                                                                                                                                                      //bpm subdivision for sync lfos
 
 // internal classes
 lfo         lfo1(DACSIZE);
@@ -304,9 +306,9 @@ if (usbMIDI.read()) {
           adsr2.noteOn(t);
         }
 
-        if (notePriority[channel] == 'T') // Top note priority
+        if (note_priority == 1) // Top note priority
           commandTopNote(channel);
-        else if (notePriority[channel] == 'B') // Bottom note priority
+        else if (note_priority == 0') // Bottom note priority
           commandBottomNote(channel);
         else { // Last note priority  
           if (notes[channel][noteMsg]) {  // If note is on and using last note priority, add to ordered list
