@@ -44,6 +44,9 @@ MCP492X myDacH(CHIP_SELECT_H);
 #define ID_SONG_BPM 250       // defines the BPM
 #define ID_NOTE_PRIORITY 251
 
+#define ID_FM_SELECT 200 
+#define ID_SYNC_SELECT 201
+
 // for ADSR1
 #define ID_ADSR1_ATTACK 010
 #define ID_ADSR1_DECAY 011
