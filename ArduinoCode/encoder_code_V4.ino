@@ -491,9 +491,9 @@ void updateEncoders() { //runs through all the encoders
             }
         
             if (VCO1_OCT_position != VCO1_OCT_position_prev){
-                //send change to teensy
+                //send change to teensy ID_VCO1_OCT 202
                 byte VCO1_OCT_pos=(byte)VCO1_OCT_position;
-                transmitVal(202,VCO1_OCT_pos); //CHECK ID               
+                transmitVal(202,VCO1_OCT_pos);               
             }
         }
 
@@ -510,9 +510,9 @@ void updateEncoders() { //runs through all the encoders
             }
         
             if (VCO1_LVL_position != VCO1_LVL_position_prev){
-                //send change to teensy
+                //send change to teensy ID_VCO1_LVL 203
                 byte VCO1_LVL_pos = (byte)VCO1_LVL_position;
-                transmitVal(203,VCO1_LVL_pos); //CHECK ID
+                transmitVal(203,VCO1_LVL_pos); 
             }
         }
     }
@@ -532,7 +532,7 @@ void updateEncoders() { //runs through all the encoders
             if (VCO2_OCT_position != VCO2_OCT_position_prev){
                 //send change to teensy
                 byte VCO2_OCT_pos = (byte)VCO2_OCT_position;
-                transmitVal(204,VCO2_OCT_pos); //CHECK ID
+                transmitVal(204,VCO2_OCT_pos); 
             }
         }
 
@@ -549,9 +549,9 @@ void updateEncoders() { //runs through all the encoders
             }
         
             if (VCO2_LVL_position != VCO2_LVL_position_prev){
-                //send change to teensy
+                //send change to teensy ID_VCO2_LVL 205
                 byte VCO2_LVL_pos = (byte)VCO2_LVL_position;
-                transmitVal(205, VCO2_LVL_pos); //CHECK ID
+                transmitVal(205, VCO2_LVL_pos); 
             }
         }   
     }
