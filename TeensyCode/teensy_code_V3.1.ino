@@ -57,6 +57,8 @@ MCP492X myDacH(CHIP_SELECT_H);
 
 #define ID_VCF_RES 213
 
+#define ID_DRIVE 214
+
 // for ADSR1
 #define ID_ADSR1_ATTACK 010
 #define ID_ADSR1_DECAY 011
