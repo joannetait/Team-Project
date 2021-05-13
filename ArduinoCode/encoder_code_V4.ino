@@ -1979,19 +1979,10 @@ void getPosition(bool encA,bool encB,bool encA_prev,bool encB_prev, int param_po
     encB_prev = encB; 
 }
 
-void transmitVal(byte ID, byte byte0, byte byte1){
-    if (byte1 != 0){
+void transmitVal(byte ID, byte val){
         byte msg[3];
-        msg[0] = ID;
-        msg[1] = byte0;
-        msg[2] = byte1;
+        msg[0] = 255;
+        msg[1] = ID;
+        msg[2] = val;
         Serial3.write(msg,3);
-        } 
-
-    else{
-        byte msg[2];
-        msg[0] = ID;
-        msg[1] = byte0;
-        Serial3.write(msg,2);
      }
-}
