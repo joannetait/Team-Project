@@ -96,8 +96,8 @@ bool enc_LFO_FREQRATE_A;
 bool enc_LFO_FREQRATE_B;
 bool enc_LFO_SHAPE_A;
 bool enc_LFO_SHAPE_B;
-bool enc_LFO_PWM_A;
-bool enc_LFO_PWM_B;
+bool enc_LFO_PHASE_A;
+bool enc_LFO_PHASE_B;
 bool enc_LFO_AMPLITUDE_A;
 bool enc_LFO_AMPLITUDE_B;
 bool enc_LFO_OFFSET_A;
@@ -107,8 +107,8 @@ bool enc_LFO_FREQRATE_A_prev;
 bool enc_LFO_FREQRATE_B_prev;
 bool enc_LFO_SHAPE_A_prev;
 bool enc_LFO_SHAPE_B_prev;
-bool enc_LFO_PWM_A_prev;
-bool enc_LFO_PWM_B_prev;
+bool enc_LFO_PHASE_A_prev;
+bool enc_LFO_PHASE_B_prev;
 bool enc_LFO_AMPLITUDE_A_prev;
 bool enc_LFO_AMPLITUDE_B_prev;
 bool enc_LFO_OFFSET_A_prev;
@@ -187,28 +187,28 @@ int DRIVE_position_prev  = 0;
 int LFO1_FREQ_position  = 0;
 int LFO1_RATE_position =0;
 int LFO1_SHAPE_position  = 0;
-int LFO1_PWM_position  = 0;
+int LFO1_PHASE_position  = 0;
 int LFO1_AMPLITUDE_position  = 0;
 int LFO1_OFFSET_position  = 0;
 
 int LFO1_FREQ_position_prev  = 0;
 int LFO1_RATE_position_prev =0;
 int LFO1_SHAPE_position_prev  = 0;
-int LFO1_PWM_position_prev  = 0;
+int LFO1_PHASE_position_prev  = 0;
 int LFO1_AMPLITUDE_position_prev  = 0;
 int LFO1_OFFSET_position_prev  = 0;
 
 int LFO2_FREQ_position  = 0;
 int LFO2_RATE_position =0;
 int LFO2_SHAPE_position  = 0;
-int LFO2_PWM_position  = 0;
+int LFO2_PHASE_position  = 0;
 int LFO2_AMPLITUDE_position  = 0;
 int LFO2_OFFSET_position  = 0;
 
 int LFO2_FREQ_position_prev  = 0;
 int LFO2_RATE_position_prev =0;
 int LFO2_SHAPE_position_prev  = 0;
-int LFO2_PWM_position_prev  = 0;
+int LFO2_PHASE_position_prev  = 0;
 int LFO2_AMPLITUDE_position_prev  = 0;
 int LFO2_OFFSET_position_prev  = 0;
 
@@ -991,7 +991,7 @@ void updateEncoders() { //runs through all the encoders
         if (LFO2_DEST12_position != LFO2_DEST12_position_prev){
         //send change to teensy (lfo2 amount to drive) ID_DRIVE_LFO2_AMOUNT 175
             byte LFO2_DEST12_pos = (byte)(LFO2_DEST12_position + 100); 
-            transmitVal(175, LFO2_DEST12_pos); //TODO ID  
+            transmitVal(175, LFO2_DEST12_pos);   
         }        
     }
 
@@ -1001,40 +1001,39 @@ void updateEncoders() { //runs through all the encoders
     digitalWrite(S2, LOW);
     digitalWrite(S3, LOW); 
     if (LFO_select == LOW) { //encoder controls LFO1 PWM
-        LFO1_PWM_position_prev = LFO1_PWM_position;
-        getPosition(enc_LFO_PWM_A, enc_LFO_PWM_B, enc_LFO_PWM_A_prev, enc_LFO_PWM_B_prev,LFO1_PWM_position, mux1A, mux1B); //get new position
+        LFO1_PHASE_position_prev = LFO1_PHASE_position;
+        getPosition(enc_LFO_PHASE_A, enc_LFO_PHASE_B, enc_LFO_PHASE_A_prev, enc_LFO_PHASE_B_prev,LFO1_PHASE_position, mux1A, mux1B); //get new position
 
-        if ( LFO1_PWM_position > 127 ) { //boundary check
-            LFO1_PWM_position = 127;
+        if ( LFO1_PHASE_position > 127 ) { //boundary check
+            LFO1_PHASE_position = 127;
             }
-        if ( LFO1_PWM_position < 0 ) {
-            LFO1_PWM_position = 0;
+        if ( LFO1_PHASE_position < 0 ) {
+            LFO1_PHASE_position = 0;
             }
             
-        if (LFO1_PWM_position != LFO1_PWM_position_prev){
-        //send change to teensy 
-        //what VCO's do these go to?
-            byte LFO1_PWM_pos = (byte)LFO1_PWM_position;
-            transmitVal(ID, LFO1_PWM_pos, 0); //TODO ID
+        if (LFO1_PHASE_position != LFO1_PHASE_position_prev){
+        //send change to teensy ID_LFO1_PHASE 106
+            byte LFO1_PHASE_pos = (byte)LFO1_PHASE_position;
+            transmitVal(106, LFO1_PHASE_pos); 
         }
     }
     if (LFO_select == HIGH) { //encoder controls LFO2 PWM
     
-        LFO2_PWM_position_prev = LFO2_PWM_position;
+        LFO2_PHASE_position_prev = LFO2_PHASE_position;
         
-        getPosition(enc_LFO_PWM_A, enc_LFO_PWM_B, enc_LFO_PWM_A_prev, enc_LFO_PWM_B_prev, LFO2_PWM_position, mux1A, mux1B); //get new position
+        getPosition(enc_LFO_PHASE_A, enc_LFO_PHASE_B, enc_LFO_PHASE_A_prev, enc_LFO_PHASE_B_prev, LFO2_PHASE_position, mux1A, mux1B); //get new position
         
-        if ( LFO2_PWM_position > 127 ) { //boundary check
-        LFO2_PWM_position = 127;
+        if ( LFO2_PHASE_position > 127 ) { //boundary check
+        LFO2_PHASE_position = 127;
         }
-        if ( LFO2_PWM_position < 0 ) {
-        LFO2_PWM_position = 0;
+        if ( LFO2_PHASE_position < 0 ) {
+        LFO2_PHASE_position = 0;
         }
         
-        if (LFO2_PWM_position != LFO2_PWM_position_prev){
-        //send change to teensy  
-            byte LFO2_PWM_pos = (byte)LFO2_PWM_position;
-            transmitVal(ID, LFO2_PWM_pos, 0); //TODO ID
+        if (LFO2_PHASE_position != LFO2_PHASE_position_prev){
+        //send change to teensy ID_LFO2_PHASE 116
+            byte LFO2_PHASE_pos = (byte)LFO2_PHASE_position;
+            transmitVal(116, LFO2_PHASE_pos); 
         }   
     }
     if (dest1_select == HIGH) {
@@ -1049,9 +1048,9 @@ void updateEncoders() { //runs through all the encoders
             }
             
         if (ADSR1_DEST1_position != ADSR1_DEST1_position_prev){
-        //send change to teensy (ADSR1 amount to vco 1 pitch bend dac) ID_DAC2_ADSR1_AMOUNT 
+        //send change to teensy (ADSR1 amount to vco 1 pitch bend dac) ID_PB1_ADSR1_AMOUNT 030
             byte ADSR1_DEST1_pos = (byte)(ADSR1_DEST1_position + 100); 
-            transmitVal(036, ADSR1_DEST1_pos, 0);  
+            transmitVal(030, ADSR1_DEST1_pos);  
         }        
     }
     if (dest2_select == HIGH) {
@@ -1066,9 +1065,9 @@ void updateEncoders() { //runs through all the encoders
             }
             
         if (ADSR1_DEST2_position != ADSR1_DEST2_position_prev){
-        //send change to teensy (ADSR1 amount to vco 1 PWM dac) ID_DAC5_ADSR1_AMOUNT 
+        //send change to teensy (ADSR1 amount to vco 1 PWM dac) ID_PWM1_ADSR1_AMOUNT 034
             byte ADSR1_DEST2_pos = (byte)(ADSR1_DEST2_position + 100); 
-            transmitVal(048, ADSR1_DEST2_pos, 0);             
+            transmitVal(034, ADSR1_DEST2_pos);             
         }        
     }
     if (dest3_select == HIGH) {
@@ -1084,9 +1083,9 @@ void updateEncoders() { //runs through all the encoders
             
         if (ADSR1_DEST3_position != ADSR1_DEST3_position_prev){
         //send change to teensy (ADSR1 amount to vco 1 SHAPE control, more logic to be written in between to drive
-        //the different vca level in the wavemixer)
+        //the different vca level in the wavemixer) ID_SHAPE1_ADSR1_AMOUNT 038
             byte ADSR1_DEST3_pos = (byte)(ADSR1_DEST3_position + 100); 
-            transmitVal(ID, ADSR1_DEST3_pos, 0); //TODO ID
+            transmitVal(038, ADSR1_DEST3_pos); 
         }        
     }
     if (dest4_select == HIGH) {
@@ -1101,9 +1100,9 @@ void updateEncoders() { //runs through all the encoders
             }
             
         if (ADSR1_DEST4_position != ADSR1_DEST4_position_prev){
-        //send change to teensy (ADSR1 amount to vco 1 level, basically sets the max value of the 3 first VCAs in the wavemixer)
+        //send change to teensy (ADSR1 amount to vco 1 level, basically sets the max value of the 3 first VCAs in the wavemixer) ID_LVL1_ADSR1_AMOUNT 042
             byte ADSR1_DEST4_pos = (byte)(ADSR1_DEST4_position + 100); 
-            transmitVal(ID, ADSR1_DEST4_pos, 0); //TODO ID
+            transmitVal(042, ADSR1_DEST4_pos, 0); 
         }        
     }
     if (dest5_select == HIGH) {
@@ -1118,9 +1117,9 @@ void updateEncoders() { //runs through all the encoders
             }
             
         if (ADSR1_DEST5_position != ADSR1_DEST5_position_prev){
-        //send change to teensy (ADSR1 amount to vco 2 pitch bend dac) ID_DAC4_ADSR1_AMOUNT 
+        //send change to teensy (ADSR1 amount to vco 2 pitch bend dac) ID_PB2_ADSR1_AMOUNT 046
             byte ADSR1_DEST5_pos = (byte)(ADSR1_DEST5_position + 100); 
-            transmitVal(044, ADSR1_DEST5_pos, 0);         
+            transmitVal(046, ADSR1_DEST5_pos);         
         }        
     }
     if (dest6_select == HIGH) {
@@ -1135,9 +1134,9 @@ void updateEncoders() { //runs through all the encoders
             }
             
         if (ADSR1_DEST6_position != ADSR1_DEST6_position_prev){
-        //send change to teensy (ADSR1 amount to vco 2 PWM dac) ID_DAC6_ADSR1_AMOUNT 
+        //send change to teensy (ADSR1 amount to vco 2 PWM dac) ID_PWM2_ADSR1_AMOUNT 050 
             byte ADSR1_DEST6_pos = (byte)(ADSR1_DEST6_position + 100); 
-            transmitVal(052, ADSR1_DEST6_pos, 0);   
+            transmitVal(050 , ADSR1_DEST6_pos);   
         }        
     }
     if (dest7_select == HIGH) {
@@ -1153,9 +1152,9 @@ void updateEncoders() { //runs through all the encoders
             
         if (ADSR1_DEST7_position != ADSR1_DEST7_position_prev){
         //send change to teensy (ADSR1 amount to vco 2 SHAPE control, more logic to be written in between to drive
-        //the different vca level in the wavemixer)
+        //the different vca level in the wavemixer) ID_SHAPE2_ADSR1_AMOUNT 054
             byte ADSR1_DEST7_pos = (byte)(ADSR1_DEST7_position + 100); 
-            transmitVal(ID, ADSR1_DEST7_pos, 0); //TODO ID   
+            transmitVal(054, ADSR1_DEST7_pos);   
         }        
     }
     if (dest8_select == HIGH) {
@@ -1170,9 +1169,9 @@ void updateEncoders() { //runs through all the encoders
             }
             
         if (ADSR1_DEST8_position != ADSR1_DEST8_position_prev){
-        //send change to teensy (lADSR1 amount to vco 2 level, basically sets the max value of the 3 first VCAs in the wavemixer)
+        //send change to teensy (lADSR1 amount to vco 2 level, basically sets the max value of the 3 first VCAs in the wavemixer) ID_LVL2_ADSR1_AMOUNT 058
             byte ADSR1_DEST8_pos = (byte)(ADSR1_DEST8_position + 100); 
-            transmitVal(ID, ADSR1_DEST8_pos, 0); //TODO ID  
+            transmitVal(058, ADSR1_DEST8_pos); 
         }        
     }
     if (dest9_select == HIGH) {
@@ -1187,9 +1186,9 @@ void updateEncoders() { //runs through all the encoders
             }
             
         if (ADSR1_DEST9_position != ADSR1_DEST9_position_prev){
-        //send change to teensy (ADSR1 amount to FM level)
+        //send change to teensy (ADSR1 amount to FM level) ID_FM_ADSR1_AMOUNT 062
             byte ADSR1_DEST9_pos = (byte)(ADSR1_DEST9_position + 100); 
-            transmitVal(ID, ADSR1_DEST9_pos, 0); //TODO ID  
+            transmitVal(062, ADSR1_DEST9_pos);  
         }        
     }    
     if (dest10_select == HIGH) {
@@ -1204,9 +1203,9 @@ void updateEncoders() { //runs through all the encoders
             }
             
         if (ADSR1_DEST10_position != ADSR1_DEST10_position_prev){
-        //send change to teensy (ADSR1 amount to cutoff) ID_DAC8_ADSR1_AMOUNT 
+        //send change to teensy (ADSR1 amount to cutoff) ID_CUTOFF_ADSR1_AMOUNT 066
             byte ADSR1_DEST10_pos = (byte)(ADSR1_DEST10_position + 100); 
-            transmitVal(060, ADSR1_DEST10_pos, 0);   
+            transmitVal(066, ADSR1_DEST10_pos);   
 
         }        
     }
@@ -1222,9 +1221,9 @@ void updateEncoders() { //runs through all the encoders
             }
             
         if (ADSR1_DEST11_position != ADSR1_DEST11_position_prev){
-        //send change to teensy (ADSR1 amount to resonance) ID_DAC7_ADSR1_AMOUNT 
+        //send change to teensy (ADSR1 amount to resonance) ID_RES_ADSR1_AMOUNT 070
             byte ADSR1_DEST11_pos = (byte)(ADSR1_DEST11_position + 100); 
-            transmitVal(056, ADSR1_DEST11_pos, 0);  
+            transmitVal(070, ADSR1_DEST11_pos);  
         }        
     }
     if (dest12_select == HIGH) {
@@ -1239,9 +1238,9 @@ void updateEncoders() { //runs through all the encoders
             }
             
         if (ADSR1_DEST12_position != ADSR1_DEST12_position_prev){
-        //send change to teensy (ADSR1 amount to drive)
+        //send change to teensy (ADSR1 amount to drive) ID_DRIVE_ADSR1_AMOUNT 074
             byte ADSR1_DEST12_pos = (byte)(ADSR1_DEST12_position + 100); 
-            transmitVal(ID, ADSR1_DEST12_pos, 0); //TODO ID          
+            transmitVal(074, ADSR1_DEST12_pos); //TODO ID          
         }        
     }
   
@@ -1265,8 +1264,8 @@ void updateEncoders() { //runs through all the encoders
             
         if (VCO1_FM_AMOUNT_position != VCO1_FM_AMOUNT_position_prev){
         //send change to teensy
-            VCO1_FM_AMOUNT_pos = (byte)VCO1_FM_AMOUNT_position;
-            transmitVal(ID,VCO1_FM_AMOUNT_pos,0); //TODO ID
+            byte VCO1_FM_AMOUNT_pos = (byte)VCO1_FM_AMOUNT_position;
+            transmitVal(207,VCO1_FM_AMOUNT_pos); 
 
         }
     }
@@ -1285,8 +1284,8 @@ void updateEncoders() { //runs through all the encoders
         
         if (VCO2_DETUNE_position != VCO2_DETUNE_position_prev){
         //send change to teensy 
-            VCO2_DETUNE_pos = (byte)VCO2_DETUNE_position_prev;
-            transmitVal(ID,VCO2_DETUNE_pos,0); //TODO ID
+            byte VCO2_DETUNE_pos = (byte)VCO2_DETUNE_position_prev;
+            transmitVal(208,VCO2_DETUNE_pos); 
         }   
     }
     if (dest1_select == HIGH) {
@@ -1301,9 +1300,9 @@ void updateEncoders() { //runs through all the encoders
             }
             
         if (ADSR2_DEST1_position != ADSR2_DEST1_position_prev){
-        //send change to teensy (ADSR2 amount to vco 1 pitch bend dac) ID_DAC2_ADSR2_AMOUNT 
+        //send change to teensy (ADSR2 amount to vco 1 pitch bend dac) ID_PB1_ADSR2_AMOUNT 031 
             byte ADSR2_DEST1_pos = (byte)(ADSR2_DEST1_position + 100); 
-            transmitVal(037, ADSR2_DEST11_pos, 0);         
+            transmitVal(031, ADSR2_DEST11_pos);         
 
         }        
     }
@@ -1319,9 +1318,9 @@ void updateEncoders() { //runs through all the encoders
             }
             
         if (ADSR2_DEST2_position != ADSR2_DEST2_position_prev){
-        //send change to teensy (ADSR2 amount to vco 1 PWM dac) ID_DAC5_ADSR2_AMOUNT
+        //send change to teensy (ADSR2 amount to vco 1 PWM dac) ID_PWM1_ADSR2_AMOUNT 035
             byte ADSR2_DEST2_pos = (byte)(ADSR2_DEST2_position + 100); 
-            transmitVal(049, ADSR2_DEST2_pos, 0); 
+            transmitVal(035, ADSR2_DEST2_pos); 
         }        
     }
     if (dest3_select == HIGH) {
@@ -1337,9 +1336,9 @@ void updateEncoders() { //runs through all the encoders
             
         if (ADSR2_DEST3_position != ADSR2_DEST3_position_prev){
         //send change to teensy (ADSR2 amount to vco 1 SHAPE control, more logic to be written in between to drive
-        //the different vca level in the wavemixer)
+        //the different vca level in the wavemixer) ID_SHAPE1_ADSR2_AMOUNT 039
             byte ADSR2_DEST3_pos = (byte)(ADSR2_DEST3_position + 100); 
-            transmitVal(ID, ADSR2_DEST3_pos, 0); //TODO ID 
+            transmitVal(039, ADSR2_DEST3_pos); //TODO ID 
 
         }        
     }
@@ -1355,9 +1354,9 @@ void updateEncoders() { //runs through all the encoders
             }
             
         if (ADSR2_DEST4_position != ADSR2_DEST4_position_prev){
-        //send change to teensy (ADSR2 amount to vco 1 level, basically sets the max value of the 3 first VCAs in the wavemixer)
+        //send change to teensy (ADSR2 amount to vco 1 level, basically sets the max value of the 3 first VCAs in the wavemixer) ID_LVL1_ADSR2_AMOUNT 043
             byte ADSR2_DEST4_pos = (byte)(ADSR2_DEST4_position + 100); 
-            transmitVal(ID, ADSR2_DEST4_pos, 0); //TODO ID 
+            transmitVal(043, ADSR2_DEST4_pos); 
         }        
     }
     if (dest5_select == HIGH) {
@@ -1372,9 +1371,9 @@ void updateEncoders() { //runs through all the encoders
             }
             
         if (ADSR2_DEST5_position != ADSR2_DEST5_position_prev){ 
-        //send change to teensy (ADSR2 amount to vco 2 pitch bend dac) ID_DAC4_ADSR2_AMOUNT 
+        //send change to teensy (ADSR2 amount to vco 2 pitch bend dac) ID_PB2_ADSR2_AMOUNT 047
             byte ADSR2_DEST5_pos = (byte)(ADSR2_DEST5_position + 100); 
-            transmitVal(045, ADSR2_DEST5_pos, 0); 
+            transmitVal(047, ADSR2_DEST5_pos); 
         }        
     }
     if (dest6_select == HIGH) {
@@ -1389,9 +1388,9 @@ void updateEncoders() { //runs through all the encoders
             }
             
         if (ADSR2_DEST6_position != ADSR2_DEST6_position_prev){
-        //send change to teensy (ADSR2 amount to vco 2 PWM dac) ID_DAC6_ADSR2_AMOUNT 
+        //send change to teensy (ADSR2 amount to vco 2 PWM dac) ID_PWM2_ADSR2_AMOUNT 051 
             byte ADSR2_DEST6_pos = (byte)(ADSR2_DEST6_position + 100); 
-            transmitVal(053, ADSR2_DEST6_pos, 0); 
+            transmitVal(051, ADSR2_DEST6_pos); 
         }        
     }
     if (dest7_select == HIGH) {
@@ -1407,9 +1406,9 @@ void updateEncoders() { //runs through all the encoders
             
         if (ADSR2_DEST7_position != ADSR2_DEST7_position_prev){
         //send change to teensy (ADSR2 amount to vco 2 SHAPE control, more logic to be written in between to drive
-        //the different vca level in the wavemixer)
+        //the different vca level in the wavemixer) ID_SHAPE2_ADSR2_AMOUNT 055
             byte ADSR2_DEST7_pos = (byte)(ADSR2_DEST7_position + 100); 
-            transmitVal(ID, ADSR2_DEST7_pos, 0); //TODO ID 
+            transmitVal(055, ADSR2_DEST7_pos); 
         }        
     }
     if (dest8_select == HIGH) {
@@ -1424,9 +1423,9 @@ void updateEncoders() { //runs through all the encoders
             }
             
         if (ADSR2_DEST8_position != ADSR2_DEST8_position_prev){
-        //send change to teensy (ADSR2 amount to vco 2 level, basically sets the max value of the 3 first VCAs in the wavemixer)
+        //send change to teensy (ADSR2 amount to vco 2 level, basically sets the max value of the 3 first VCAs in the wavemixer) ID_LVL2_ADSR2_AMOUNT 059
             byte ADSR2_DEST8_pos = (byte)(ADSR2_DEST8_position + 100); 
-            transmitVal(ID, ADSR2_DEST8_pos, 0); //TODO ID 
+            transmitVal(059, ADSR2_DEST8_pos); 
         }        
     }
     if (dest9_select == HIGH) {
@@ -1441,9 +1440,9 @@ void updateEncoders() { //runs through all the encoders
             }
             
         if (ADSR2_DEST9_position != ADSR2_DEST9_position_prev){
-        //send change to teensy (ADSR2 amount to FM level)
+        //send change to teensy (ADSR2 amount to FM level) ID_FM_ADSR2_AMOUNT 063
             byte ADSR2_DEST9_pos = (byte)(ADSR2_DEST9_position + 100); 
-            transmitVal(ID, ADSR2_DEST9_pos, 0); //TODO ID 
+            transmitVal(063, ADSR2_DEST9_pos); 
         }        
     }    
     if (dest10_select == HIGH) {
@@ -1458,9 +1457,9 @@ void updateEncoders() { //runs through all the encoders
             }
             
         if (ADSR2_DEST10_position != ADSR2_DEST10_position_prev){
-        //send change to teensy (ADSR2 amount to cutoff) ID_DAC8_ADSR2_AMOUNT 061
+        //send change to teensy (ADSR2 amount to cutoff) ID_CUTOFF_ADSR2_AMOUNT 067
             byte ADSR2_DEST10_pos = (byte)(ADSR2_DEST10_position + 100); 
-            transmitVal(061, ADSR2_DEST10_pos, 0); 
+            transmitVal(067, ADSR2_DEST10_pos); 
         }        
     }
     if (dest11_select == HIGH) {
@@ -1475,9 +1474,9 @@ void updateEncoders() { //runs through all the encoders
             }
             
         if (ADSR2_DEST11_position != ADSR2_DEST11_position_prev){
-        //send change to teensy (ADSR2 amount to resonance) ID_DAC7_ADSR2_AMOUNT 057
+        //send change to teensy (ADSR2 amount to resonance) ID_RES_ADSR2_AMOUNT 071
             byte ADSR2_DEST11_pos = (byte)(ADSR2_DEST11_position + 100); 
-            transmitVal(057, ADSR2_DEST11_pos, 0); 
+            transmitVal(071, ADSR2_DEST11_pos); 
         }        
     }
     if (dest12_select == HIGH) {
@@ -1492,9 +1491,9 @@ void updateEncoders() { //runs through all the encoders
             }
             
         if (ADSR2_DEST12_position != ADSR2_DEST12_position_prev){
-        //send change to teensy (ADSR2 amount to drive)
+        //send change to teensy (ADSR2 amount to drive) ID_DRIVE_ADSR2_AMOUNT 075
             byte ADSR2_DEST12_pos = (byte)(ADSR2_DEST12_position + 100); 
-            transmitVal(ID, ADSR2_DEST12_pos, 0); //TODO ID
+            transmitVal(075, ADSR2_DEST12_pos); 
         }        
     }
   
@@ -1518,8 +1517,7 @@ void updateEncoders() { //runs through all the encoders
         if (ADSR1_RELEASE_position != ADSR1_RELEASE_position_prev){
         //send change to teensy ID_ADSR1_RELEASE 013
             byte ADSR1_RELEASE_pos = (byte)ADSR1_RELEASE_position;
-            transmitVal(013,ADSR1_RELEASE_pos,0);
-
+            transmitVal(013,ADSR1_RELEASE_pos);
         }
     }
     if (ADSR_select == HIGH) { //encoder controls ADSR2 RELEASE
@@ -1538,7 +1536,7 @@ void updateEncoders() { //runs through all the encoders
         if (ADSR2_RELEASE_position != ADSR2_RELEASE_position_prev){
         //send change to teensy ID_ADSR2_RELEASE 023
             byte ADSR2_RELEASE_pos = (byte)ADSR2_RELEASE_position;
-            transmitVal(023,ADSR1_RELEASE_pos,0);
+            transmitVal(023,ADSR1_RELEASE_pos);
         }   
     }
 
@@ -1561,7 +1559,7 @@ void updateEncoders() { //runs through all the encoders
         if (ADSR1_DECAY_position != ADSR1_DECAY_position_prev){
         //send change to teensy ID_ADSR1_DECAY 011
             byte ADSR1_DECAY_pos = (byte)ADSR1_DECAY_position;
-            transmitVal(011,ADSR1_DECAY_pos,0);
+            transmitVal(011,ADSR1_DECAY_pos);
         }
     }
     if (ADSR_select == HIGH) { //encoder controls ADSR2 DECAY
@@ -1580,7 +1578,7 @@ void updateEncoders() { //runs through all the encoders
         if (ADSR2_DECAY_position != ADSR2_DECAY_position_prev){
         //send change to teensy ID_ADSR2_DECAY 021 
             byte ADSR2_DECAY_pos = (byte)ADSR2_DECAY_position;
-            transmitVal(021,ADSR2_DECAY_pos,0);        
+            transmitVal(021,ADSR2_DECAY_pos);        
         }   
     }
   
@@ -1601,7 +1599,9 @@ void updateEncoders() { //runs through all the encoders
             }
             
         if (VCO1_PWM_position != VCO1_PWM_position_prev){
-        //send change to teensy
+        //send change to teensy ID_VCO1_PWM 211
+            byte VCO1_PWM_pos = (byte)VCO1_PWM_position;
+            transmitVal(211,VCO1_PWM_pos);
         }
     }
     if (VCO_select == HIGH) { //encoder controls VCO2 PWM
@@ -1620,6 +1620,8 @@ void updateEncoders() { //runs through all the encoders
         
         if (VCO2_PWM_position != VCO2_PWM_position_prev){
         //send change to teensy  
+            byte VCO2_PWM_pos = (byte)VCO2_PWM_position;
+            transmitVal(212,VCO2_PWM_pos);
         }   
     }
    
@@ -1642,7 +1644,9 @@ void updateEncoders() { //runs through all the encoders
             }
         
             if (LFO1_FREQ_position != LFO1_FREQ_position_prev){
-                //send change to teensy
+                //send change to teensy ID_LFO1_MODE0_FREQ 101
+                byte LFO1_FREQ_pos = (byte)LFO1_FREQ_position;
+                transmitVal(101,LFO1_FREQ_pos);
             }
         }
 
@@ -1659,7 +1663,10 @@ void updateEncoders() { //runs through all the encoders
             }
         
             if (LFO1_RATE_position != LFO1_RATE_position_prev){
-                //send change to teensy
+                //send change to teensy ID_LFO1_MODE1_RATE 102
+                byte LFO1_RATE_pos = (byte)LFO1_RATE_position;
+                transmitVal(102,LFO1_RATE_pos);
+
             }
         }
     }
@@ -1677,7 +1684,9 @@ void updateEncoders() { //runs through all the encoders
             }
         
             if (LFO2_FREQ_position != LFO2_FREQ_position_prev){
-                //send change to teensy
+                //send change to teensy ID_LFO2_MODE0_FREQ 111
+                byte LFO2_FREQ_pos = (byte)LFO2_FREQ_position;
+                transmitVal(111,LFO2_FREQ_pos);
             }
         }
 
@@ -1694,7 +1703,9 @@ void updateEncoders() { //runs through all the encoders
             }
         
             if (LFO2_RATE_position != LFO2_RATE_position_prev){
-                //send change to teensy
+                //send change to teensy ID_LFO2_MODE1_RATE 112
+                byte LFO2_RATE_pos = (byte)LFO2_RATE_position;
+                transmitVal(112,LFO2_RATE_pos);
             }
         }   
     }
@@ -1716,7 +1727,9 @@ void updateEncoders() { //runs through all the encoders
         }
             
         if (ADSR1_SUSTAIN_position != ADSR1_SUSTAIN_position_prev){
-        //send change to teensy
+        //send change to teensy ID_ADSR1_SUSTAIN 012
+            byte ADSR1_SUSTAIN_pos = (byte)ADSR1_SUSTAIN_position;
+            transmitVal(012,ADSR1_SUSTAIN_pos);
         }
     }
     if (ADSR_select == HIGH) { //encoder controls ADSR2 SUSTAIN
@@ -1733,7 +1746,9 @@ void updateEncoders() { //runs through all the encoders
         }
         
         if (ADSR2_SUSTAIN_position != ADSR2_SUSTAIN_position_prev){
-        //send change to teensy  
+        //send change to teensy ID_ADSR2_SUSTAIN 022
+            byte ADSR2_SUSTAIN_pos = (byte)ADSR2_SUSTAIN_position;
+            transmitVal(022,ADSR2_SUSTAIN_pos);          
         }   
     }
     
@@ -1746,15 +1761,17 @@ void updateEncoders() { //runs through all the encoders
         LFO1_OFFSET_position_prev = LFO1_OFFSET_position;
         getPosition(enc_LFO_OFFSET_A, enc_LFO_OFFSET_B, enc_LFO_OFFSET_A_prev, enc_LFO_OFFSET_B_prev, LFO1_OFFSET_position, mux1A, mux1B); //get new position
 
-        if ( LFO1_AMPLITUDE_position > 127 ) { //boundary check
-            LFO1_AMPLITUDE_position = 127;
+        if ( LFO1_OFFSET_position > 127 ) { //boundary check
+            LFO1_OFFSET_position = 127;
             }
-        if ( LFO1_AMPLITUDE_position < 0 ) {
-            LFO1_AMPLITUDE_position = 0;
+        if ( LFO1_OFFSET_position < 0 ) {
+            LFO1_OFFSET_position = 0;
             }
             
-        if (LFO1_AMPLITUDE_position != LFO1_AMPLITUDE_position_prev){
-        //send change to teensy
+        if (LFO1_OFFSET_position != LFO1_OFFSET_position_prev){
+        //send change to teensy ID_LFO1_AMPL_OFFSET 105
+            byte LFO1_OFFSET_pos = (byte)LFO1_OFFSET_position;
+            transmitVal(105,LFO1_OFFSET_pos); 
         }
     }
     if (LFO_select == HIGH) { //encoder controls LFO2 OFFSET
@@ -1769,7 +1786,9 @@ void updateEncoders() { //runs through all the encoders
             }
             
         if (LFO2_OFFSET_position != LFO2_OFFSET_position_prev){
-        //send change to teensy
+        //send change to teensy ID_LFO2_AMPL_OFFSET 115
+            byte LFO2_OFFSET_pos = (byte)LFO2_OFFSET_position;
+            transmitVal(115,LFO2_OFFSET_pos);         
         }
     }
 
@@ -1790,7 +1809,9 @@ void updateEncoders() { //runs through all the encoders
             }
             
         if (LFO1_AMPLITUDE_position != LFO1_AMPLITUDE_position_prev){
-        //send change to teensy
+        //send change to teensy ID_LFO1_AMPL 104
+            byte LFO1_AMPLITUDE_pos = (byte)LFO1_AMPLITUDE_position;
+            transmitVal(104,LFO1_AMPLITUDE_pos);
         }
     }
     if (LFO_select == HIGH) { //encoder controls LFO2 AMPLITUDE
@@ -1805,7 +1826,9 @@ void updateEncoders() { //runs through all the encoders
             }
             
         if (LFO2_AMPLITUDE_position != LFO2_AMPLITUDE_position_prev){
-        //send change to teensy
+        //send change to teensy ID_LFO2_AMPL 114
+            byte LFO2_AMPLITUDE_pos = (byte)LFO2_AMPLITUDE_position;
+            transmitVal(114,LFO2_AMPLITUDE_pos);
         }
     }
 
@@ -1818,15 +1841,17 @@ void updateEncoders() { //runs through all the encoders
         VCO1_SHAPE_position_prev = VCO1_SHAPE_position;
         getPosition(enc_VCO_SHAPE_A, enc_VCO_SHAPE_B, enc_VCO_SHAPE_A_prev, enc_VCO_SHAPE_B_prev, VCO1_SHAPE_position, mux1A, mux1B); //get new position
 
-        if ( VCO1_SHAPE_position > 127 ) { //boundary check
-            VCO1_SHAPE_position = 127;
+        if ( VCO1_SHAPE_position > 180 ) { //boundary check
+            VCO1_SHAPE_position = 180;
             }
         if ( VCO1_SHAPE_position < 0 ) {
             VCO1_SHAPE_position = 0;
             }
             
         if (VCO1_SHAPE_position != VCO1_SHAPE_position_prev){
-        //send change to teensy
+        //send change to teensy ID_VCO1_SHAPE 209
+            byte VCO1_SHAPE_pos = (byte)VCO1_SHAPE_position;
+            transmitVal(209, VCO1_SHAPE_pos);
         }
     }
     if (VCO_select == HIGH) { //encoder controls VCO2 SHAPE
@@ -1836,15 +1861,17 @@ void updateEncoders() { //runs through all the encoders
         
         getPosition(enc_VCO_SHAPE_A, enc_VCO_SHAPE_B, enc_VCO_SHAPE_A_prev, enc_VCO_SHAPE_B_prev, VCO2_SHAPE_position, mux1A, mux1B); //get new position
         
-        if ( VCO2_SHAPE_position > 127 ) { //boundary check
-        VCO2_SHAPE_position = 127;
+        if ( VCO2_SHAPE_position > 180 ) { //boundary check
+        VCO2_SHAPE_position = 180;
         }
-        if ( VCO2_PWM_position < 0 ) {
+        if ( VCO2_SHAPE_position < 0 ) {
         VCO2_SHAPE_position = 0;
         }
         
         if (VCO2_SHAPE_position != VCO2_SHAPE_position_prev){
         //send change to teensy  
+            byte VCO2_SHAPE_pos = (byte)VCO1_SHAPE_position;
+            transmitVal(210, VCO2_SHAPE_pos);
         }   
     }
     
@@ -1864,7 +1891,9 @@ void updateEncoders() { //runs through all the encoders
         DRIVE_position = 0;
     }        
     if (DRIVE_position != DRIVE_position_prev){
-        //send change to teensy
+        //send change to teensy ID_DRIVE 214
+        byte DRIVE_pos = (byte)DRIVE_position;
+        transmitVal(214,DRIVE_pos);
     }  
     
     ///////////////MULTI ON PIN 13: CONTROLS ADSR ATTACK//////////////////////////////////////////////
@@ -1876,30 +1905,34 @@ void updateEncoders() { //runs through all the encoders
         ADSR1_ATTACK_position_prev =ADSR1_ATTACK_position;
         getPosition(enc_ADSR_ATTACK_A, enc_ADSR_ATTACK_B, enc_ADSR_ATTACK_A_prev, enc_ADSR_ATTACK_B_prev, ADSR1_ATTACK_position, mux1A, mux1B); //get new position
 
-        if ( ADSR1_SUSTAIN_position > 127 ) { //boundary check
-            ADSR1_SUSTAIN_position = 127;
+        if ( ADSR1_ATTACK_position > 127 ) { //boundary check
+            ADSR1_ATTACK_position = 127;
         }
-        if ( ADSR1_SUSTAIN_position < 0 ) {
-            ADSR1_SUSTAIN_position = 0;
+        if ( ADSR1_ATTACK_position < 0 ) {
+            ADSR1_ATTACK_position = 0;
         }
             
-        if (ADSR1_SUSTAIN_position != ADSR1_SUSTAIN_position_prev){
-        //send change to teensy
+        if (ADSR1_ATTACK_position != ADSR1_ATTACK_position_prev){
+        //send change to teensy ID_ADSR1_ATTACK 010
+            byte ADSR1_ATTACK_pos = (byte)ADSR1_ATTACK_position;
+            transmitVal(010, ADSR1_ATTACK_pos);
         }
     }
-    if (ADSR_select == HIGH) { //encoder controls ADSR2 SUSTAIN ATTACK
-        ADSR1_ATTACK_position_prev =ADSR1_ATTACK_position;
+    if (ADSR_select == HIGH) { //encoder controls ADSR2  ATTACK
+        ADSR2_ATTACK_position_prev =ADSR2_ATTACK_position;
         getPosition(enc_ADSR_ATTACK_A, enc_ADSR_ATTACK_B, enc_ADSR_ATTACK_A_prev, enc_ADSR_ATTACK_B_prev, ADSR1_ATTACK_position, mux1A, mux1B); //get new position
 
-        if ( ADSR1_SUSTAIN_position > 127 ) { //boundary check
-            ADSR1_SUSTAIN_position = 127;
+        if ( ADSR2_ATTACK_position > 127 ) { //boundary check
+            ADSR2_ATTACK_position = 127;
         }
-        if ( ADSR1_SUSTAIN_position < 0 ) {
-            ADSR1_SUSTAIN_position = 0;
+        if ( ADSR2_ATTACK_position < 0 ) {
+            ADSR2_ATTACK_position = 0;
         }
             
-        if (ADSR1_SUSTAIN_position != ADSR1_SUSTAIN_position_prev){
-        //send change to teensy
+        if (ADSR2_ATTACK_position != ADSR1_SUSTAIN_position_prev){
+        //send change to teensy ID_ADSR2_ATTACK 020
+            byte ADSR2_ATTACK_pos = (byte)ADSR2_ATTACK_position;
+            transmitVal(020, ADSR2_ATTACK_pos);
         }
     }
 
@@ -1919,7 +1952,9 @@ void updateEncoders() { //runs through all the encoders
         RES_position = 0;
     }        
     if (RES_position != RES_position_prev){
-        //send change to teensy
+        //send change to teensy ID_VCF_RES 213
+        byte RES_pos = (byte)RES_position;
+        transmitVal(213,RES_pos);
     }    
     
     ///////////////MULTI ON PIN 15: CONTROLS LFO SHAPE//////////////////////////////////////////////
@@ -1939,7 +1974,9 @@ void updateEncoders() { //runs through all the encoders
             }
             
         if (LFO1_SHAPE_position != LFO1_SHAPE_position_prev){
-        //send change to teensy
+        //send change to teensy ID_LFO1_WAVEFORM 103
+            byte LFO1_SHAPE_pos = (byte)LFO1_SHAPE_position;
+            transmitVal(103,LFO1_SHAPE_pos);
         }
     }
     if (LFO_select == HIGH) { //encoder controls LFO2 SHAPE
@@ -1956,7 +1993,9 @@ void updateEncoders() { //runs through all the encoders
         }
         
         if (LFO2_SHAPE_position != LFO2_SHAPE_position_prev){
-        //send change to teensy  
+        //send change to teensy ID_LFO2_WAVEFORM 113
+            byte LFO2_SHAPE_pos = (byte)LFO2_SHAPE_position;
+            transmitVal(113,LFO2_SHAPE_pos);       
         }   
     }
 }
