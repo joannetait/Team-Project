@@ -1020,13 +1020,13 @@ void updateEncoders() { //runs through all the encoders
         if ( LFO_select == LOW){ //button controls LFO1 mode
             LFO1_MODE_select = !LFO1_MODE_select;
             //send change to teensy
-            LFO1_MODE_sel = (byte)LFO1_MODE_select;
+            byte LFO1_MODE_sel = (byte)LFO1_MODE_select;
             transmitVal(100,LFO1_MODE_sel);
         }
         if ( LFO_select == HIGH ){ //button controls LFO1 mode
             LFO2_MODE_select = !LFO2_MODE_select;   
             //send change to teensy
-            LFO2_MODE_sel = (byte)LFO2_MODE_select;
+            byte LFO2_MODE_sel = (byte)LFO2_MODE_select;
             transmitVal(110,LFO2_MODE_sel);
         }
     }
