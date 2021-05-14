@@ -1666,7 +1666,7 @@ void updateEncoders() { //runs through all the encoders
         if (ADSR1_DEST4_position != ADSR1_DEST4_position_prev){
         //send change to teensy (ADSR1 amount to vco 1 level, basically sets the max value of the 3 first VCAs in the wavemixer) ID_LVL1_ADSR1_AMOUNT 042
             byte ADSR1_DEST4_pos = (byte)(ADSR1_DEST4_position + 100); 
-            transmitVal(42, ADSR1_DEST4_pos, 0); 
+            transmitVal(42, ADSR1_DEST4_pos); 
         }        
     }
     if (dest5_select == HIGH) {
@@ -1865,7 +1865,7 @@ void updateEncoders() { //runs through all the encoders
             
         if (ADSR2_DEST1_position != ADSR2_DEST1_position_prev){
         //send change to teensy (ADSR2 amount to vco 1 pitch bend dac) ID_PB1_ADSR2_AMOUNT 031 
-            byte ADSR2_DEST1_pos = (byte)(ADSR2_DEST1_position + 100); 
+            byte ADSR2_DEST11_pos = (byte)(ADSR2_DEST1_position + 100); 
             transmitVal(31, ADSR2_DEST11_pos);         
 
         }        
