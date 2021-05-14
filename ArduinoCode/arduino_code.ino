@@ -2100,7 +2100,7 @@ void updateEncoders() { //runs through all the encoders
         if (ADSR2_RELEASE_position != ADSR2_RELEASE_position_prev){
         //send change to teensy ID_ADSR2_RELEASE 023
             byte ADSR2_RELEASE_pos = (byte)ADSR2_RELEASE_position;
-            transmitVal(23,ADSR1_RELEASE_pos);
+            transmitVal(23,ADSR2_RELEASE_pos);
         }   
     }
 
