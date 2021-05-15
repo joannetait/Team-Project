@@ -1,4 +1,3 @@
-# include <EEPROM.h>
 # include <SPI.h>
 # include <GD2.h>
 static int param_1 = 69;
