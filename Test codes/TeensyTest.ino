@@ -183,35 +183,6 @@ void setup() {
   
   Serial.begin(115200);
 
-  PB1_LFO1_AMOUNT = -1;
-  PB2_LFO1_AMOUNT = -0.5;
-  PWM1_LFO1_AMOUNT = 0;
-  PWM2_LFO1_AMOUNT = 0.5;
-  LVL1_LFO1_AMOUNT = 1;
-  LVL2_LFO1_AMOUNT = 0.5;
-  CUTOFF_LFO1_AMOUNT = 0;
-  RES_LFO1_AMOUNT = -0.5;
-  DRIVE_LFO1_AMOUNT = -1.;
-  SHAPE1_LFO1_AMOUNT = -0.5;
-  SHAPE2_LFO1_AMOUNT = 0;
-  VCA7_LFO1_AMOUNT = 0.5;
-
-  lvl1_position = 1;
-  lvl2_position = 1;
-  drive_position = 1;
-  fm_position = 1;
-  detune_position = 1;
-  cutoff_position = 1;
-  res_position = 1;
-  pwm1_position = 1;
-  pwm2_position = 1;
-  vca1_position = 1;
-  vca2_position = 1;
-  vca3_position = 1;
-  vca4_position = 1;
-  vca5_position = 1;
-  vca6_position = 1;
-  volume_position = 1; 
 }
 
 unsigned long trigTimer[3] = {0}; //from elkayem code, don't kno why it's in between setup and main and not in init stage
@@ -219,6 +190,36 @@ bool notes[3][88] = {0}, initial_loop = 1;
 int8_t noteOrder[3][10] = {0}, orderIndx[3] = {0};
 
 void loop() {
+
+    PB1_LFO1_AMOUNT = -1;
+    PB2_LFO1_AMOUNT = -0.5;
+    PWM1_LFO1_AMOUNT = 0;
+    PWM2_LFO1_AMOUNT = 0.5;
+    LVL1_LFO1_AMOUNT = 1;
+    LVL2_LFO1_AMOUNT = 0.5;
+    CUTOFF_LFO1_AMOUNT = 0;
+    RES_LFO1_AMOUNT = -0.5;
+    DRIVE_LFO1_AMOUNT = -1.;
+    SHAPE1_LFO1_AMOUNT = -0.5;
+    SHAPE2_LFO1_AMOUNT = 0;
+    VCA7_LFO1_AMOUNT = 0.5;
+  
+    lvl1_position = 1;
+    lvl2_position = 1;
+    drive_position = 1;
+    fm_position = 1;
+    detune_position = 1;
+    cutoff_position = 1;
+    res_position = 1;
+    pwm1_position = 1;
+    pwm2_position = 1;
+    vca1_position = 1;
+    vca2_position = 1;
+    vca3_position = 1;
+    vca4_position = 1;
+    vca5_position = 1;
+    vca6_position = 1;
+    volume_position = 1; 
     t = micros();           // take timestamp
     
     adsr1_sample = adsr1.getWave(t) -2048; //current sample from modulation (0 centered) to be multiplied by amounts to relevant DACs
