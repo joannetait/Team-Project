@@ -350,7 +350,6 @@ void loop() {
         if (cc_control == ID_SONG_BPM) {
             bpm = ((float)value)/10;
             lfo1.setMode1Bpm(bpm);
-            lfo2.setMode1Bpm(bpm);
         }
         if (cc_control == ID_NOTE_PRIORITY){
             note_priority = value;
@@ -510,7 +509,6 @@ int commandTopNote(int channel){
   else{ // All notes are off, turn off gate
   // turn adsrs off
    adsr1.noteOff(t);
-   adsr2.noteOff(t);
   }
 }
 int commandBottomNote(int channel){
@@ -532,7 +530,6 @@ int commandBottomNote(int channel){
   else{ // All notes are off, turn off gate
    // turn adsrs off
    adsr1.noteOff(t);
-   adsr2.noteOff(t);
   }
 }
 int commandLastNote(int channel){
@@ -550,7 +547,6 @@ int commandLastNote(int channel){
   }
   // turn adsrs off
   adsr1.noteOff(t);
-  adsr2.noteOff(t);
 }
 
 // Rescale 88 notes to 4096 mV:
