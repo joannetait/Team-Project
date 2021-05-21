@@ -9,8 +9,8 @@
 #include <lfo.h>          // required for function generation
 #include <adsr.h>         // required for function generation
 
-#define CHIP_SELECT_A 2 // =SC1 on schematic 
-#define CHIP_SELECT_B 3 // =SC2 on schematic etc
+#define CHIP_SELECT_A 3 // =SC1 on schematic 
+//#define CHIP_SELECT_B 4 // =SC2 on schematic etc
 #define CHIP_SELECT_C 10
 #define CHIP_SELECT_D 9
 #define CHIP_SELECT_E 8
@@ -21,7 +21,7 @@
 
 // DAC init: DAC_A holds DAC1 and 2, DAC_B holds DAC3 and 4 and so on
 MCP492X myDacA(CHIP_SELECT_A);
-MCP492X myDacB(CHIP_SELECT_B);
+//MCP492X myDacB(CHIP_SELECT_B);
 MCP492X myDacC(CHIP_SELECT_C);
 MCP492X myDacD(CHIP_SELECT_D);
 MCP492X myDacE(CHIP_SELECT_E);
@@ -163,6 +163,8 @@ float           VCA7_ADSR2_AMOUNT = 0.;
 float           VCA7_LFO1_AMOUNT = 0.;
 float           VCA7_LFO2_AMOUNT = 0.;
 
+int mV;
+
 void setup() {
   delay(100);
   lfo1.setAmpl(DACSIZE); // init amplitude
@@ -251,17 +253,17 @@ void loop() {
         adsr2.noteOn(t);
         }
         if (note_priority == 1){ // Top note priority
-          commandTopNote(channel);
+          mV=commandTopNote(channel);
         }
         else if (note_priority == 0){ // Bottom note priority
-          commandBottomNote(channel);
+          mV= commandBottomNote(channel);
         }
         else { // Last note priority  
           if (notes[channel][noteMsg]) {  // If note is on and using last note priority, add to ordered list
               orderIndx[channel] = (orderIndx[channel]+1) % 10;
               noteOrder[channel][orderIndx[channel]] = noteMsg;                 
           }
-          commandLastNote(channel);
+         mV = commandLastNote(channel);
         }
             
         break;
@@ -277,22 +279,22 @@ void loop() {
     }
 }
     
-   // myDacA.analogWrite(0,2730);
-   // myDacA.analogWrite(1,0xAAA);
-    myDacB.analogWrite(0,lfo1.getWave(t));
-    myDacB.analogWrite(1,lfo1.getWave(t));
-    myDacC.analogWrite(0,lfo1.getWave(t));
-    myDacC.analogWrite(1,lfo1.getWave(t));
-    myDacD.analogWrite(0,lfo1.getWave(t));
-    myDacD.analogWrite(1,lfo1.getWave(t));
-    myDacE.analogWrite(0,lfo1.getWave(t));
-    myDacE.analogWrite(1,lfo1.getWave(t));
-    myDacF.analogWrite(0,lfo1.getWave(t));
-    myDacF.analogWrite(1,lfo1.getWave(t));
-    myDacG.analogWrite(0,lfo1.getWave(t));
-    myDacG.analogWrite(1,lfo1.getWave(t));
-    myDacH.analogWrite(0,lfo1.getWave(t));
-    myDacH.analogWrite(1,2730);
+    myDacA.analogWrite(0,mV);
+    myDacA.analogWrite(1,mV);
+   // myDacB.analogWrite(0,lfo1.getWave(t));
+   // myDacB.analogWrite(1,lfo1.getWave(t));
+    myDacC.analogWrite(0,mV);
+    myDacC.analogWrite(1,mV);
+    myDacD.analogWrite(0,mV);
+    myDacD.analogWrite(1,mV);
+    myDacE.analogWrite(0,mV);
+    myDacE.analogWrite(1,mV);
+    myDacF.analogWrite(0,mV);
+    myDacF.analogWrite(1,mV);
+    myDacG.analogWrite(0,mV);
+    myDacG.analogWrite(1,mV);
+    myDacH.analogWrite(0,mV);
+    myDacH.analogWrite(1,mV);
     
 }
 
@@ -300,7 +302,7 @@ int getInt(int l_highByte, int l_lowByte) {
   return ((unsigned int)l_highByte << 8) + l_lowByte;
 }
 
-void commandTopNote(int channel){
+int commandTopNote(int channel){
   int topNote = 0;
   bool noteActive = false;
  
@@ -312,15 +314,15 @@ void commandTopNote(int channel){
   }
 
   if (noteActive){
-    myDacA.analogWrite(0,note2mV(topNote));
-  }
+    return note2mV(topNote);
+      }
   else{ // All notes are off, turn off gate
   // turn adsrs off
    adsr1.noteOff(t);
    adsr2.noteOff(t);
   }
 }
-void commandBottomNote(int channel){
+int commandBottomNote(int channel){
 
   int bottomNote = 0;
   bool noteActive = false;
@@ -333,7 +335,8 @@ void commandBottomNote(int channel){
   }
 
   if (noteActive){
-    myDacA.analogWrite(0,note2mV(bottomNote));
+    return note2mV(bottomNote);
+   // myDacA.analogWrite(0,note2mV(bottomNote));
   }
   else{ // All notes are off, turn off gate
    // turn adsrs off
@@ -341,7 +344,7 @@ void commandBottomNote(int channel){
    adsr2.noteOff(t);
   }
 }
-void commandLastNote(int channel){
+int commandLastNote(int channel){
 
   int8_t noteIndx;
   
@@ -349,8 +352,9 @@ void commandLastNote(int channel){
     noteIndx = noteOrder[channel][ mod(orderIndx[channel]-i, 10) ];
     if (notes[channel][noteIndx]) {
 
-      myDacA.analogWrite(0,note2mV(noteIndx));
-      return;
+    //  myDacA.analogWrite(0,note2mV(noteIndx));
+      
+      return note2mV(noteIndx);
     }
   }
   // turn adsrs off
