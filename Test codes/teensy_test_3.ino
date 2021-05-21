@@ -9,8 +9,8 @@
 #include <lfo.h>          // required for function generation
 #include <adsr.h>         // required for function generation
 
-#define CHIP_SELECT_A 12 // =SC1 on schematic 
-#define CHIP_SELECT_B 11 // =SC2 on schematic etc
+#define CHIP_SELECT_A 2 // =SC1 on schematic 
+#define CHIP_SELECT_B 3 // =SC2 on schematic etc
 #define CHIP_SELECT_C 10
 #define CHIP_SELECT_D 9
 #define CHIP_SELECT_E 8
@@ -43,7 +43,7 @@ unsigned long   t = 0;
 unsigned long   sync_t0 = 0;
 unsigned long   connected_t0 = 0;
 
-float sfAdj[3];
+
 float _freqArray[24] = {64, 48, 32, 24, 16, 12, 8, 6, 5.3333, 4, 3.2, 3, 2.667, 2, 1.333, 1, 0.667, 0.5, 0.333, 0.25, 0.167, 0.125, 0.0625, 0.03125}; //array representing the different
                                                                                                                                                       //bpm subdivision for sync lfos
 float           bpm = 120;
@@ -170,8 +170,8 @@ void setup() {
   sync_t0 = t;
   connected_t0 = t;
 
-  pinMode(LED_BUILTIN, OUTPUT);
-  digitalWrite(LED_BUILTIN, false);
+ // pinMode(LED_BUILTIN, OUTPUT);
+ // digitalWrite(LED_BUILTIN, false);
   
   myDacA.begin();
   myDacB.begin();
@@ -312,7 +312,7 @@ void commandTopNote(int channel){
   }
 
   if (noteActive){
-    commandNote(topNote, channel);
+    myDacA.analogWrite(0,note2mV(topNote));
   }
   else{ // All notes are off, turn off gate
   // turn adsrs off
@@ -333,7 +333,7 @@ void commandBottomNote(int channel){
   }
 
   if (noteActive){
-    commandNote(bottomNote, channel);
+    myDacA.analogWrite(0,note2mV(bottomNote));
   }
   else{ // All notes are off, turn off gate
    // turn adsrs off
@@ -348,7 +348,8 @@ void commandLastNote(int channel){
   for (int i=0; i<10; i++) {
     noteIndx = noteOrder[channel][ mod(orderIndx[channel]-i, 10) ];
     if (notes[channel][noteIndx]) {
-      commandNote(noteIndx,channel);
+
+      myDacA.analogWrite(0,note2mV(noteIndx));
       return;
     }
   }
@@ -364,16 +365,12 @@ void commandLastNote(int channel){
 // Note that DAC output will need to be amplified by 1.77X for the standard 1V/octave 
 #define NOTE_SF 47.069f 
 
-void commandNote(int noteMsg, int channel) {
+int note2mV(int noteMsg) {
   //turn ADSRs ON
-  trigTimer[channel] = millis();
-  
-  unsigned int mV = (unsigned int) ((float) noteMsg * NOTE_SF * sfAdj[channel] + 0.5);   
-  myDacA.analogWrite(0, mV); 
- // myDacC.analogWrite(0, mV); 
+  unsigned int mV = (unsigned int) ((float) noteMsg * NOTE_SF * 1.15 + 0.5);
+  return mV;   
+ 
 }
-
-//void PBNote(int noteMsg, int channel, )
 
 int mod(int a, int b){
     int r = a % b;
