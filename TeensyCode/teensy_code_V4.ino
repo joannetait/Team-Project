@@ -313,13 +313,6 @@ void loop() {
     }
     myDacG.analogWrite(0,VCA5); 
     
-    //-------------------------------write to wavemixer vca6---------------------------------//
-    VCA6=int(drive_position*vca6_position + 2048); 
-    if (VCA6 > 4095){
-        VCA6=4095;
-    }
-    myDacG.analogWrite(1,VCA1); 
-
     //-------------------------------write to OUTPUT VCA---------------------------------//
     VCA8=int(volume_position*(adsr1_sample+2048)); //hard coded adsr1 to control volume enveloppe at all time, no volume mod coded for this iteration
     if (VCA8 > 4095){
