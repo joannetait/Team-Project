@@ -214,6 +214,7 @@ void setup() {
   lfo1.setMode0Freq(40);
 
   Serial.begin(9600);
+  Serial4.begin(9600);
 
 }
 
@@ -298,6 +299,13 @@ void loop() {
     }
     myDacD.analogWrite(1,RES); 
 
+    //-------------------------------write to wavemixer vca4---------------------------------//
+    VCA4=int(drive_position*vca4_position + 2048); 
+    if (VCA4 > 4095){
+        VCA4=4095;
+    }
+    myDacF.analogWrite(1,VCA4);     
+
      //-------------------------------write to wavemixer vca5---------------------------------//
     VCA5=int(drive_position*vca5_position + 2048); 
     if (VCA5 > 4095){
@@ -320,7 +328,7 @@ void loop() {
     myDacH.analogWrite(1,VCA8);    
 
 //----------Check if control commands have been received from Arduino------------//
-  if (Serial.available()) {
+  if (Serial4.available()) {
     connected_t0 = t;
     if (digitalRead(LED_BUILTIN) == 0)
       digitalWrite(LED_BUILTIN, 1);
@@ -328,19 +336,19 @@ void loop() {
     rx_state++;
     switch (rx_state) {
       case 1:                     // first byte is always 255 for sync
-        cc_sync = Serial.read();
+        cc_sync = Serial4.read();
         if(cc_sync != 255) {     // reset if first is not 255 sync byte
           rx_state = 0;
         }
         break;
       case 2:                     // second is the control byte / ID byte
-        cc_control = Serial.read();
+        cc_control = Serial4.read();
         break;        
       case 3:                     // third is the most significant byte of the value
-        cc_val1 = Serial.read();     
+        cc_val1 = Serial4.read();     
         break;
       case 4:                     // fourth is the least significant byte of the value
-        cc_val2 = Serial.read();
+        cc_val2 = Serial4.read();
         rx_state = 0;
 
         // re-compile value from its two bytes (cc_val1 is the MSB and cc_val2 the LSB)
