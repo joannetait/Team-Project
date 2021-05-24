@@ -1,13 +1,13 @@
-// Three bytes interface is used between Arduino Due and Teensy on COM serial port:
+// Three bytes interface is used between Arduino Due and Teensy on serial 1 port:
 // Byte 1: 255 (sync byte)
 // Byte 2: <control> - [0:255]
-// Byte 3: <value MSB> - [0:255]
+// Byte 3: <value> - [0:255]
 
 // --------------------------------------------------
-#include <MCP492X.h> // Include the library
-#include <SPI.h>
-#include <lfo.h>          // required for function generation
-#include <adsr.h>         // required for function generation
+#include <MCP492X.h>      // library for DACs
+#include <SPI.h>          // required for MCP492X.h
+#include <lfo.h>          // required for lfo function generation
+#include <adsr.h>         // required for adsr function generation
 
 #define CHIP_SELECT_A 8 
 #define CHIP_SELECT_B 9 
@@ -15,7 +15,7 @@
 #define CHIP_SELECT_D 12
 
 
-// DAC init: DAC_A holds DAC1 and 2, DAC_B holds DAC3 and 4 and so on
+// DAC initialisation: DAC_A holds DAC1 and 2, DAC_B holds DAC3 and 4 and so on
 MCP492X myDacA(CHIP_SELECT_A);
 MCP492X myDacB(CHIP_SELECT_B);
 MCP492X myDacC(CHIP_SELECT_C);
@@ -24,13 +24,13 @@ MCP492X myDacD(CHIP_SELECT_D);
 
 #define DACSIZE 4096             // vertical resolution of the DACs
 
-// NOTE: all ID_xxxx variables below are CONTROL numbers for interfacing with Arduino Due
+//       ID_xxxx variables below are CONTROL numbers for interfacing with Arduino Due
 //       for instance: if Arduino sends over 255 - 210 - 0 - 100 that will mean that the attack of the ADSR is going to be set to 100µs
 //       (Because of this definition -> #define ID_ADSR_ATTACK 210)
-//NOTE2: you can change these definitions as you like, but dont forget to change the according numbers in the DUE code as well.
 
-#define ID_SONG_BPM 250       // defines the BPM
-#define ID_NOTE_PRIORITY 251
+
+#define ID_SONG_BPM 250       
+#define ID_NOTE_PRIORITY 251 
 
 #define ID_VCO1_OCT 202
 #define ID_VCO1_LVL 203
@@ -107,7 +107,7 @@ float _freqArray[24] = {64, 48, 32, 24, 16, 12, 8, 6, 5.3333, 4, 3.2, 3, 2.667, 
 //bpm subdivision for sync lfos
 float           bpm = 120;
 
-int             note_priority = 2; // 0 = bottom note 1=top note 2=last note //receive from teensy in note priority menu default is last note
+int             note_priority = 2; // 0 = bottom note 1=top note 2=last note. Receive from teensy in note priority menu. Default is last note
 
 int             VCO1_OCT = 0;
 int             lfo1_ampl = DACSIZE - 1;
@@ -115,11 +115,8 @@ int             lfo1_ampl = DACSIZE - 1;
 int             VCO1_SHAPE = 0;
 int             VCO2_SHAPE = 0;
 
-// internal classes
+// internal classes for modulations
 lfo         lfo1(DACSIZE);
-//lfo         lfo2(DACSIZE);
-//lfo         lfo3(DACSIZE);
-
 adsr        adsr1(DACSIZE);
 
 //ints for writing to DACS
@@ -172,6 +169,8 @@ float           VCA7_LFO1_AMOUNT = 0.;
 
 int8_t          velocity;
 
+//innitial ADSR paramaters
+
 unsigned long   adsr_attack = 100000;               // time in µs
 unsigned long   adsr_decay = 100000;                // time in µs
 int             adsr_sustain = 3500;                // sustain level -> from 0 to DACSIZE-1
@@ -193,174 +192,143 @@ void setup() {
   lfo1.setWaveForm(2); //triangle wave
   lfo1.setMode0Freq(1);
 
-  Serial1.begin(9600);
-  Serial.begin(9600);
-
+  Serial1.begin(9600); //recieve comms from UI on Serial1 RX
+  
   adsr1.setAttack(adsr_attack);                // initialize attack
   adsr1.setDecay(adsr_decay);                  // initialize decay
   adsr1.setSustain(adsr_sustain);              // initialize sustain
   adsr1.setRelease(adsr_release);              // initialize release
 }
 
-unsigned long trigTimer[3] = {0}; //from elkayem code, don't kno why it's in between setup and main and not in init stage
+
+//initialise arrays for MIDI input
 bool notes[3][88] = {0}, initial_loop = 1;
 int8_t noteOrder[3][10] = {0}, orderIndx[3] = {0};
-
 
 void loop() {
 
   t = micros();           // take timestamp
-  int8_t noteMsg, channel, d2;
+  int8_t noteMsg, channel, d2; //re initialise before MIDI is read
+
+  
 
   if (usbMIDI.read()) {
     byte type = usbMIDI.getType();
-    // Serial.print(type);
     if (type == 224) {
       // Pitch bend output from 0 to 1023 mV.  Left shift d2 by 4 to scale from 0 to 2047.
-      // With DAC gain = 1X, this will yield a range from 0 to 1023 mV.  Additional amplification
-      // after DAC will rescale to -1 to +1V.
+      // With DAC gain = 1X, this will yield a range from 0 to 1023 mV.  
       d2 = usbMIDI.getData2(); // d2 from 0 to 127, mid point = 64
       pb = d2 << 4;
-      //   Serial.print("pitchbend");
-      //   Serial.print(pb);
       myDacA.analogWrite(0, pb);
     }
 
 
     switch (type) {
-      case usbMIDI.NoteOff:
-        //adsr1.setRelease(120000);
-        //adsr1.noteOff(t);
-      case usbMIDI.NoteOn:
-        noteMsg = usbMIDI.getData1() -18 ; // A0 = 21, Top Note = 108
-        channel = usbMIDI.getChannel() - 1;
 
-        if (channel > 2) return;  // Only channel 0,1,2 supported
-        if ((noteMsg < 0) || (noteMsg > 49)) break;  // Only 49 notes of keyboard are supported
+      case usbMIDI.NoteOff:
+
+        adsr1.noteOff(t); //turn ADSR off
+
+      case usbMIDI.NoteOn:
+
+        noteMsg = usbMIDI.getData1() -18 ; // Get note number. A0 = 21, Top Note = 108
+        channel = usbMIDI.getChannel() - 1; //Get channel number
+
+        if (channel > 2) return;  // Channel 0,1,2 supported
+        if ((noteMsg < 0) || (noteMsg > 49)) break;  // 49 notes of keyboard are supported = 4 octaves 
         if (type == usbMIDI.NoteOn){
-          Serial.println("noteon");
-          velocity = usbMIDI.getData2();
-          Serial.println(velocity);
+
+          velocity = usbMIDI.getData2(); //Get velocity value
+        
         }
         else velocity  = 0;
         if (velocity == 0)  {
           notes[channel][noteMsg] = false;
-          // adsr1.noteOff(t);
         }
         else {
           notes[channel][noteMsg] = true;
-          // Serial.println("ADSR ON");
-          adsr1.noteOn(t);
+          adsr1.noteOn(t); //turn ADSR on
         }
         if (note_priority == 1) { // Top note priority
-          mV = commandTopNote(channel);
-          //    Serial.print("dacA");
-          myDacA.analogWrite(1, mV);
+          mV = commandTopNote(channel); //get mV value to write to DAC
+          myDacA.analogWrite(1, mV);    //write to DAC
 
         }
         else if (note_priority == 0) { // Bottom note priority
-          mV = commandBottomNote(channel);
-          //Serial.print("dacA");
-          myDacA.analogWrite(0, mV);
+          mV = commandBottomNote(channel); //get mV value to write to DAC
+          myDacA.analogWrite(0, mV);       //write to DAC
         }
         else { // Last note priority
           if (notes[channel][noteMsg]) {  // If note is on and using last note priority, add to ordered list
             orderIndx[channel] = (orderIndx[channel] + 1) % 10;
             noteOrder[channel][orderIndx[channel]] = noteMsg;
           }
-          mV = commandLastNote(channel);
-          // Serial.print("dacA");
-          myDacA.analogWrite(1, mV);
+          mV = commandLastNote(channel);//get mV value to write to DAC
+          myDacA.analogWrite(1, mV); //write to DAC
         }
 
         break;
     }
   }
+  t = micros(); //take new timestamp
 
-  t = micros();
-  // Serial.println(adsr1.getWave(t));
   //-------------------------------write to CUTOFF---------------------------------//
   CUTOFF = (cutoff_position + (adsr1.getWave(t) * CUTOFF_ADSR1_AMOUNT + lfo1.getWave(t) * CUTOFF_LFO1_AMOUNT)); //all modulations weighted and added together
   if (CUTOFF > 4095) {
     CUTOFF = 4095;
   }
-  //  Serial.println("Cutoff");
-  //  Serial.println(CUTOFF);
-  myDacB.analogWrite(0, CUTOFF);
+  myDacB.analogWrite(0, CUTOFF); //write to DAC
 
   //-------------------------------write to RES---------------------------------//
   RES = (res_position + (adsr1.getWave(t) * RES_ADSR1_AMOUNT + lfo1.getWave(t) * RES_LFO1_AMOUNT)); //all modulations weighted and added together
   if (RES > 4095) {
     RES = 4095;
   }
-  // Serial.println("RES");
-  // Serial.println(RES);
-  //Serial.println(RES);
-  myDacB.analogWrite(1, RES);
+  myDacB.analogWrite(1, RES); //write to DAC
 
 
   //-------------------------------write to wavemixer vca4---------------------------------//
-  VCA4 = (vca4_position +(adsr1.getWave(t)*SHAPE1_ADSR1_AMOUNT + lfo1.getWave(t) * SHAPE1_LFO1_AMOUNT));
+  VCA4 = (vca4_position +(adsr1.getWave(t)*SHAPE1_ADSR1_AMOUNT + lfo1.getWave(t) * SHAPE1_LFO1_AMOUNT)); //all modulations weighted and added together
   if (VCA4 > 4095) {
     VCA4 = 4095;
   }
-  myDacC.analogWrite(0, VCA4);
+  myDacC.analogWrite(0, VCA4); //write to DAC
 
 
   //-------------------------------write to wavemixer vca5---------------------------------//
-  VCA5 = (vca5_position + (adsr1.getWave(t) *SHAPE1_ADSR1_AMOUNT + lfo1.getWave(t) * SHAPE1_LFO1_AMOUNT));
-
-  // Serial.print(VCA5);
-
+  VCA5 = (vca5_position + (adsr1.getWave(t) *SHAPE1_ADSR1_AMOUNT + lfo1.getWave(t) * SHAPE1_LFO1_AMOUNT)); //all modulations weighted and added together
   if (VCA5 > 4095) {
     VCA5 = 4095;
   }
-
-  // Serial.println(VCA5,BIN);
-  myDacC.analogWrite(1, VCA5);
+  myDacC.analogWrite(1, VCA5); //write to DAC
 
 
   //-------------------------------write to OUTPUT VCA---------------------------------//
   VCA8 = (volume_position * adsr1.getWave(t) * (velocity / 127)); //hard coded adsr1 to control volume enveloppe at all time, no volume mod coded for this iteration
-  Serial.println("VCA8");
-  Serial.println(VCA8);
   if (VCA8 > 4095) {
     VCA8 = 4095;
   }
-  
-  myDacD.analogWrite(0, adsr1.getWave(t));
+  myDacD.analogWrite(0, VCA8)); //write to DAC
 
 
 
 
   //----------Check if control commands have been received from Arduino------------//
   if (Serial1.available()) {
-
-    //  Serial.println("reading");
-
     connected_t0 = t;
-    //  if (digitalRead(LED_BUILTIN) == 0)
-    //   digitalWrite(LED_BUILTIN, 1);
-
     rx_state++;
     switch (rx_state) {
       case 1:                     // first byte is always 255 for sync
         int cc_sync = Serial1.read();
-        // Serial.println(cc_sync);
         if (cc_sync != 255) {    // reset if first is not 255 sync byte
           rx_state = 0;
         }
         break;
       case 2:                     // second is the control byte / ID byte
         int cc_control = Serial1.read();
-       // (int)cc_control;
-      //  Serial.println("ID Val");
-      //  Serial.println(cc_control);
         break;
       case 3:                     // third is the value
         int value = Serial1.read();
-       // Serial.println("byte 1 =value");
-       // Serial.println(value);
         rx_state = 0;
 
         // Track specific IDs
@@ -373,46 +341,37 @@ void loop() {
           note_priority = value;
         }
 
-        // LFO1
-        else if (cc_control == ID_LFO1_MODE) { //selb
+        // update LFO1 paramaters
+        else if (cc_control == ID_LFO1_MODE) { 
           lfo1.setMode(value);
-         // Serial.println("LFO1_MODE " );
-         // Serial.println(value);
         }
+
         else if ((int)cc_control == ID_LFO1_MODE0_FREQ) {
           lfo1.setMode0Freq(((float)value) / 100, t);
-         // Serial.println("LFO1_MODE0_FREQ");
-         // Serial.println(value);
         }
+
         else if (cc_control == ID_LFO1_MODE1_RATE) {
           lfo1.setMode1Rate(_freqArray[(int)value]);
-        // Serial.println("LFO1_MODE1_RATE ");
-        // Serial.println(value);
-         
         }
+
         else if (cc_control == ID_LFO1_AMPL) {
           lfo1_ampl = value;
           lfo1.setAmpl(lfo1_ampl);
-          //Serial.println("LFO1_AMPL  ");
-        // Serial.println(value);
-        }
-        else if (cc_control == ID_LFO1_AMPL_OFFSET) {
-          lfo1.setAmplOffset(value);
-         // Serial.println("LFO1_AMPL_OFFSET ");
-         // Serial.println(value);
-        }
-        else if (cc_control == ID_LFO1_WAVEFORM) {
-          lfo1.setWaveForm(value);
-        // Serial.println("LFO1_SHAPE ");
-        // Serial.println(value);
-        }
-        else if (cc_control == ID_LFO1_PHASE) {
-          lfo1.setMode1Phase((360 - (float)value) / 360);
-         // Serial.println("LFO1_PHASE ");
-         // Serial.println(value);
         }
 
-        // ADSR1
+        else if (cc_control == ID_LFO1_AMPL_OFFSET) {
+          lfo1.setAmplOffset(value);
+        }
+
+        else if (cc_control == ID_LFO1_WAVEFORM) {
+          lfo1.setWaveForm(value);
+        }
+
+        else if (cc_control == ID_LFO1_PHASE) {
+          lfo1.setMode1Phase((360 - (float)value) / 360);
+        }
+
+        // update ADSR paramaters
         else if (cc_control == ID_ADSR1_ATTACK)
           adsr1.setAttack(1000 * value);                                        // times 1000 -> conversion from ms to µs
         else if (cc_control == ID_ADSR1_DECAY)
@@ -491,6 +450,7 @@ void loop() {
 }
 
 int commandTopNote(int channel) {
+  //returns mV value for highest note played
   int topNote = 0;
   bool noteActive = false;
 
@@ -504,16 +464,12 @@ int commandTopNote(int channel) {
   if (noteActive) {
     return note2mV(topNote);
   }
-  else { // All notes are off, turn off gate
-    // turn adsrs off
-   // Serial.println("ADSR OFF commandtopnote");
-   // Serial.println("ADSR OFF");
+  else { // All notes are off, turn off ADSR
     adsr1.noteOff(t);
-
   }
 }
 int commandBottomNote(int channel) {
-
+  //returns mV value for lowest note played
   int bottomNote = 0;
   bool noteActive = false;
 
@@ -526,17 +482,14 @@ int commandBottomNote(int channel) {
 
   if (noteActive) {
     return note2mV(bottomNote);
-    // myDacA.analogWrite(0,note2mV(bottomNote));
   }
-  else { // All notes are off, turn off gate
-    // turn adsrs off
-    //  Serial.println("ADSR OFF commandbottomnote");
-    //  Serial.println("ADSR OFF");
+  else { // All notes are off, turn ADSR off
     adsr1.noteOff(t);
-
   }
 }
+
 int commandLastNote(int channel) {
+  //returns mV value for last note played
 
   int8_t noteIndx;
 
@@ -544,34 +497,26 @@ int commandLastNote(int channel) {
     noteIndx = noteOrder[channel][ mod(orderIndx[channel] - i, 10) ];
     if (notes[channel][noteIndx]) {
 
-      //  myDacA.analogWrite(0,note2mV(noteIndx));
-
       return note2mV(noteIndx);
     }
   }
-  // turn adsrs off
-  //  Serial.println("ADSR OFF commandlastnote()");
-  adsr1.noteOff(t);
-
+  else { // All notes are off, turn ADSR off
+    adsr1.noteOff(t);
+  }
 }
 
+#define NOTE_SF 46.534f
+
+int note2mV(int noteMsg) {
 // Rescale 88 notes to 4096 mV:
 //    noteMsg = 0 -> 0 mV
 //    noteMsg = 87 -> 4096 mV
 // DAC output will be (4095/49) = 41.364 mV per note, and 496.364 mV per octave
-// Note that DAC output will need to be amplified by 1.77X for the standard 1V/octave
-#define NOTE_SF 46.534f
-
-int note2mV(int noteMsg) {
-  //turn ADSRs ON
-  unsigned int mV = (unsigned int) ((float) noteMsg * NOTE_SF * 0.9454 + 17.5);
-  //  Serial.print("inside func");
-  //  Serial.print(mV);
+  unsigned int mV = (unsigned int) ((float) noteMsg * NOTE_SF * 0.9454 + 17.5); //last 2 values can be tweaked for tuning
   return mV;
-
 }
 
-int mod(int a, int b) {
-  int r = a % b;
-  return r < 0 ? r + b : r;
+int mod(int a, int b){
+    int r = a % b;
+    return r < 0 ? r + b : r;
 }

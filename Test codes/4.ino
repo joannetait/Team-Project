@@ -318,7 +318,13 @@ void loop() {
 
 
   //-------------------------------write to OUTPUT VCA---------------------------------//
-  VCA8 = (volume_position * (adsr1_sample + 2048) * (velocity / 127)); //hard coded adsr1 to control volume enveloppe at all time, no volume mod coded for this iteration
+  Serial.println(volume_position);
+  Serial.println("volume_position");
+  Serial.println("adsr1_sample");
+  Serial.println(adsr1_sample);
+  Serial.println("velocity");
+  Serial.println(velocity);
+  VCA8 = (volume_position * adsr1_sample * (velocity / 127)); //hard coded adsr1 to control volume enveloppe at all time, no volume mod coded for this iteration
   (unsigned int)VCA8;
   if (VCA8 > 4095) {
     VCA8 = 4095;
