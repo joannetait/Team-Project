@@ -178,6 +178,7 @@ unsigned long   adsr_release = 1000000;
 
 void setup() {
   delay(100);
+  
   lfo1.setAmpl(DACSIZE); // init amplitude
 
   sync_t0 = t;
